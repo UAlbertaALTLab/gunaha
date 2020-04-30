@@ -1,2 +1,2 @@
 # gunaha
-Intelligent On-line Tsuut'ina Dictionary
+Gúnahà - Intelligent On-line Tsuut'ina Dictionary
