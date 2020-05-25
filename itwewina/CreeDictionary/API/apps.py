@@ -1,19 +1,30 @@
 import logging
-import string
 from collections import defaultdict
 from pathlib import Path
-from typing import Dict, List, Set
 
 from django.apps import AppConfig
 from django.conf import settings
-from django.db import OperationalError, connection
+from django.db import connection, OperationalError
+from typing import List, Dict, Set
+import string
 
+from .affix_search import AffixSearcher
 from utils import shared_res_dir
 from utils.cree_lev_dist import remove_cree_diacritics
 
-from .affix_search import AffixSearcher
-
 logger = logging.getLogger(__name__)
+
+
+def initialize_fuzzy_search():
+    # todo: fuzzy search is for now not used. Use it in the future
+    # # without the guard
+    # # on travis this line of code will be run before a database exist and will error
+    # if "API_inflection" in connection.introspection.table_names():
+    #     # Have to do it locally, or will get error (apps aren't loaded yet)
+    #     from API.models import Inflection
+    #
+    #     Inflection.init_fuzzy_searcher()
+    pass
 
 
 def initialize_preverb_search():
@@ -88,8 +99,8 @@ def initialize_affix_search():
     logger.info("Finished building tries")
 
 
-class WIMConfig(AppConfig):
-    name = "WIM"
+class APIConfig(AppConfig):
+    name = "API"
 
     def ready(self):
         """
@@ -97,6 +108,7 @@ class WIMConfig(AppConfig):
         It initializes fuzzy search (build the data structure).
         It also hashes preverbs for faster preverb matching.
         """
+        initialize_fuzzy_search()
         initialize_preverb_search()
         initialize_affix_search()
         read_morpheme_rankings()
