@@ -1,0 +1,72 @@
+# Python stuff
+__pycache__/
+*.py[cod]
+*.prof
+build/
+dist/
+eggs/
+*.egg-info/
+*.egg
+pip-log.txt
+pip-delete-this-directory.txt
+
+# Python testing
+.tox/
+.coverage
+.coverate.*
+.cache
+.hypothesis/
+.pytest_cache/
+.mypy_cache/
+
+# Django stuff
+DatabaseManager.log*
+*.log
+local_settings.py
+db.sqlite3
+*.sqlite3.bak
+*.sqlite3-journal
+
+# pyenv
+.python-version
+
+# Virtual environments
+.venv
+env/
+venv/
+
+# Editors
+*~
+*.sw[po]
+.vscode/
+
+# JetBrains Rider
+*.sln.iml
+# JetBrains project files
+.idea/
+
+# MacOS Files
+.DS_Store
+
+# Node and Cypress stuff
+.sass-cache/
+node_modules/
+cypress/screenshots
+cypress/videos
+
+########################## Project-specific ignores ##########################
+
+# should not commited in source control https://docs.pipenv.org/en/latest/advanced/#automatic-loading-of-env
+.env
+
+# Dictionary Files
+/hfst
+
+# Django collectstatic
+/CreeDictionary/static/
+
+# Generated files:
+CreeDictionary/CreeDictionary/static/CreeDictionary/js/index.js
+CreeDictionary/CreeDictionary/static/CreeDictionary/css/styles.css
+*.css.map
+*.js.map

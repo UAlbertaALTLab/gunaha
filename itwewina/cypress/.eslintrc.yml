@@ -1,0 +1,35 @@
+# copy pasted. you can change it
+env:
+  browser: true
+  es6: true
+  node: true
+  webextensions: true
+  jquery: true
+globals:
+  XRegExp: true
+  # Cypress/chai/Mocha globals
+  Cypress: true
+  afterEach: true
+  beforeEach: true
+  context: true
+  cy: true
+  describe: true
+  expect: true
+  it: true
+extends: 'eslint:recommended'
+parserOptions:
+  ecmaVersion: 2016
+rules:
+  indent:
+    - error
+    - 2
+  linebreak-style:
+    - error
+    - unix
+  quotes:
+    - error
+    - single
+  semi:
+    - error
+    - never
+  no-console: "warn"
