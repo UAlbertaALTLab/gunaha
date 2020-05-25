@@ -9,7 +9,6 @@ from django.conf import settings
 from django.db import OperationalError, connection
 
 from utils import shared_res_dir
-from utils.cree_lev_dist import remove_cree_diacritics
 
 from .affix_search import AffixSearcher
 

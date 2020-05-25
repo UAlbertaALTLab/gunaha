@@ -1,11 +1,11 @@
 from typing import Set
 
-from cree_sro_syllabics import syllabics2sro
 from django.contrib import admin
 from django.utils.html import format_html
 from django.utils.translation import gettext_lazy as _
 
 from shared import descriptive_analyzer
+
 from .models import Definition, DictionarySource, Wordform
 
 
@@ -69,14 +69,7 @@ class InflectionAdmin(admin.ModelAdmin):
         if not search_term:
             return queryset, use_distinct
 
-        search_term = (
-            search_term.replace("ā", "â")
-            .replace("ē", "ê")
-            .replace("ī", "î")
-            .replace("ō", "ô")
-        )
-        search_term = syllabics2sro(search_term)
-
+        # TODO: Customize this normalization for Tsuut'ina
         search_term = search_term.lower()
 
         # utilize the spell relax in descriptive_analyzer
