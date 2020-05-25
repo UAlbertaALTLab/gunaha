@@ -21,7 +21,6 @@ from typing import (
 
 import attr
 from attr import attrs
-from cree_sro_syllabics import syllabics2sro
 from django.conf import settings
 from django.db import models, transaction
 from django.db.models import Max, Q, QuerySet
@@ -31,20 +30,18 @@ from django.utils.encoding import iri_to_uri
 from django.utils.functional import cached_property
 from sortedcontainers import SortedSet
 
-import CreeDictionary.hfstol as temp_hfstol
-from .affix_search import AffixSearcher
 from constants import POS, ConcatAnalysis, FSTTag, Label, Language, ParadigmSize
-from fuzzy_search import CreeFuzzySearcher
 from paradigm import Layout
 from shared import paradigm_filler
 from utils import fst_analysis_parser, get_modified_distance
-from utils.cree_lev_dist import remove_cree_diacritics
 from utils.fst_analysis_parser import (
     FST_TAG_LABELS,
     LabelFriendliness,
     partition_analysis,
 )
-from .schema import SerializedSearchResult, SerializedWordform, SerializedDefinition
+
+from .affix_search import AffixSearcher
+from .schema import SerializedDefinition, SerializedSearchResult, SerializedWordform
 
 logger = logging.getLogger(__name__)
 
@@ -89,7 +86,6 @@ def fetch_preverbs(user_query: str) -> Set["Wordform"]:
 
     if user_query.endswith("-"):
         user_query = user_query[:-1]
-    user_query = remove_cree_diacritics(user_query)
 
     return Wordform.PREVERB_ASCII_LOOKUP[user_query]
 
@@ -161,8 +157,6 @@ MatchedEnglish = NewType("MatchedEnglish", str)
 
 
 class Wordform(models.Model):
-    _cree_fuzzy_searcher = None
-
     # this is initialized upon app ready.
     # this helps speed up preverb match
     # will look like: {"pe": {...}, "e": {...}, "nitawi": {...}}
@@ -235,17 +229,6 @@ class Wordform(models.Model):
             if set(definition.source_ids) - {"MD"}:
                 return False
         return True
-
-    @classmethod
-    def init_fuzzy_searcher(cls):
-        if cls._cree_fuzzy_searcher is None:
-            cls._cree_fuzzy_searcher = CreeFuzzySearcher(cls.objects.all())
-
-    @classmethod
-    def fuzzy_search(cls, query: str, distance: int) -> QuerySet:
-        if cls._cree_fuzzy_searcher is None:
-            return Wordform.objects.none()
-        return cls._cree_fuzzy_searcher.search(query, distance)
 
     # override pk to allow use of bulk_create
     # auto-increment is also implemented in the overridden save() method below
@@ -358,7 +341,6 @@ class Wordform(models.Model):
             .replace("ī", "î")
             .replace("ō", "ô")
         )
-        user_query = syllabics2sro(user_query)
 
         user_query = user_query.lower()
 
@@ -380,12 +362,8 @@ class Wordform(models.Model):
             ):
                 cree_results.add(CreeResult(wf.analysis, wf, wf.lemma))
 
-        # utilize the spell relax in descriptive_analyzer
-        # TODO: use shared.descriptive_analyzer (HFSTOL) when this bug is fixed:
-        # https://github.com/UAlbertaALTLab/cree-intelligent-dictionary/issues/120
-        fst_analyses: Set[ConcatAnalysis] = set(
-            a.concatenate() for a in temp_hfstol.analyze(user_query)
-        )
+        # TODO: there is no FST, so there are no analyses ¯\_(ツ)_/¯
+        fst_analyses: Set[ConcatAnalysis] = set()
 
         all_standard_forms = []
 
@@ -414,11 +392,8 @@ class Wordform(models.Model):
                     )
                     continue
 
-                # now we generate the standardized form of the user query for display purpose
-                # notice Err/Orth tags needs to be stripped because it makes our generator generate un-normatized forms
-                normatized_form_for_analysis = [
-                    *temp_hfstol.generate(analysis.replace("+Err/Orth", ""))
-                ]
+                # TODO: THIS TO BE REWRITTEN
+                normatized_form_for_analysis = [analysis]
                 all_standard_forms.extend(normatized_form_for_analysis)
                 if len(all_standard_forms) == 0:
                     logger.error(
