@@ -30,18 +30,15 @@ from django.utils.encoding import iri_to_uri
 from django.utils.functional import cached_property
 from sortedcontainers import SortedSet
 
-from constants import POS, ConcatAnalysis, FSTTag, Label, Language, ParadigmSize
-from paradigm import Layout
-from shared import paradigm_filler
-from utils import fst_analysis_parser, get_modified_distance
-from utils.fst_analysis_parser import (
+from .affix_search import AffixSearcher
+from .constants import POS, ConcatAnalysis, FSTTag, Label, Language, ParadigmSize
+from .schema import SerializedDefinition, SerializedSearchResult, SerializedWordform
+from .utils import fst_analysis_parser, get_modified_distance
+from .utils.fst_analysis_parser import (
     FST_TAG_LABELS,
     LabelFriendliness,
     partition_analysis,
 )
-
-from .affix_search import AffixSearcher
-from .schema import SerializedDefinition, SerializedSearchResult, SerializedWordform
 
 logger = logging.getLogger(__name__)
 
@@ -209,16 +206,6 @@ class Wordform(models.Model):
             if homographs.filter(**{field: getattr(self, field)}).count() == 1:
                 return field
         return "id"  # id always guarantees unique match
-
-    @property
-    def paradigm(self) -> List[Layout]:
-        # todo: allow paradigm size other then ParadigmSize.BASIC
-        slc = fst_analysis_parser.extract_simple_lc(self.analysis)
-        if slc is not None:
-            tables = paradigm_filler.fill_paradigm(self.text, slc, ParadigmSize.BASIC)
-        else:
-            tables = []
-        return tables
 
     @property
     def md_only(self) -> bool:
