@@ -16,49 +16,6 @@ from .affix_search import AffixSearcher
 logger = logging.getLogger(__name__)
 
 
-def initialize_preverb_search():
-    from .models import Wordform
-    from django.db.models import Q
-
-    # Hashing to speed up exhaustive preverb matching
-    # so that we won't need to search from the database every time the user searches for a preverb or when the user
-    # query contains a preverb
-
-    # An all inclusive filtering mechanism is full_lc=IPV OR pos="IPV". Don't rely on a single one
-    # due to the inconsistent labelling in the source crkeng.xml.
-    # e.g. for preverb "pe", the source gives pos=Ipc lc=IPV.
-    # For "sa", the source gives pos=IPV lc="" (unspecified)
-
-    # after https://github.com/UAlbertaALTLab/cree-intelligent-dictionary/pull/262
-    # many preverbs are normalized so that both full_lc and pos are set to IPV.
-    try:
-        for preverb_wordform in Wordform.objects.filter(
-            Q(full_lc="IPV") | Q(pos="IPV")
-        ):
-            if not preverb_wordform.md_only:
-                Wordform.PREVERB_ASCII_LOOKUP[
-                    remove_cree_diacritics(preverb_wordform.text.strip("-"))
-                ].add(preverb_wordform)
-    except OperationalError:
-        # the ready function gets called during `$ manage-db import` when one builds the database from scratch
-        # At that time, while the migrations are not applied, Wordform tables does not exist.
-        pass
-
-
-def read_morpheme_rankings():
-    from .models import Wordform
-
-    lines = (
-        Path(shared_res_dir / "W_aggr_corp_morph_log_freq.txt").read_text().splitlines()
-    )
-    for line in lines:
-        cells = line.split("\t")
-        # todo: use the third row
-        if len(cells) >= 2:
-            freq, morpheme, *_ = cells
-            Wordform.MORPHEME_RANKINGS[morpheme] = float(freq)
-
-
 def initialize_affix_search():
     """
     build tries and attach to Wordform class to facilitate prefix/suffix search
@@ -66,6 +23,7 @@ def initialize_affix_search():
     logger.info("Building tries for affix search...")
     from .models import Wordform
 
+    # TODO: use Tsuut'ina orthography instead.
     cree_letter_to_ascii = {
         ascii_letter: ascii_letter for ascii_letter in string.ascii_lowercase
     }
@@ -88,8 +46,8 @@ def initialize_affix_search():
     logger.info("Finished building tries")
 
 
-class APIConfig(AppConfig):
-    name = "API"
+class MorphoDictConfig(AppConfig):
+    name = "MorphoDict"
 
     def ready(self):
         """
