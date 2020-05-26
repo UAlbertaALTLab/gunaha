@@ -53,13 +53,22 @@ def import_dictionary() -> None:
     entries = csv.DictReader(tsv_file, delimiter="\t")
     terms: Dict[int, Head] = {}
     definitions: Set[Definition] = set()
-    pat = re.compile(r"""os(\d+)\w?""")
+    pat = re.compile(r"""^os(\d+)([abcdefgh])?$""")
     for entry in entries:
         folio_id = entry["ID"]
+
         # deal with duplicate ids...
         match = pat.match(folio_id)
         assert match is not None
-        primary_key = int(match.group(1), base=10)
+
+        os_id = int(match.group(1), base=10)
+        if sub_id := match.group(2):
+            sub_part = 1 + ord(sub_id) - ord("a")
+        else:
+            sub_part = 0
+
+        primary_key = os_id * 100 + sub_part
+
         term = normalize("NFC", entry["Bruce - Tsuut'ina text"])
         word_class = entry["Part of speech"]
         starlight_def = entry["Bruce - English text"]
