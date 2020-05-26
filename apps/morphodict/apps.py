@@ -8,9 +8,8 @@ from django.apps import AppConfig
 from django.conf import settings
 from django.db import OperationalError, connection
 
-from utils import shared_res_dir
-
 from .affix_search import AffixSearcher
+from .utils import shared_res_dir
 
 logger = logging.getLogger(__name__)
 
@@ -46,7 +45,9 @@ def initialize_affix_search():
 
 
 class MorphoDictConfig(AppConfig):
-    name = "MorphoDict"
+    # TODO: This should not be in "apps.morphodict..."
+    name = "apps.morphodict"
+    verbose_name = "Morphological Dictionary"
 
     def ready(self):
         """
@@ -54,6 +55,4 @@ class MorphoDictConfig(AppConfig):
         It initializes fuzzy search (build the data structure).
         It also hashes preverbs for faster preverb matching.
         """
-        initialize_preverb_search()
         initialize_affix_search()
-        read_morpheme_rankings()
