@@ -21,10 +21,8 @@ class Head(models.Model):
     class Meta:
         unique_together = ("text", "word_class")
 
-
     def __str__(self) -> str:
         return f"{self.text} ({self.word_class})"
-
 
 
 class DictionarySource(models.Model):

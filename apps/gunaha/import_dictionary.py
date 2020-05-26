@@ -8,7 +8,7 @@ import re
 from collections import defaultdict
 from hashlib import sha1, sha384
 from pathlib import Path
-from typing import Dict, Set
+from typing import Dict, Set, Tuple
 from unicodedata import normalize
 
 from django.db import transaction
@@ -36,11 +36,15 @@ def import_dictionary() -> None:
 
     logger.info("Importing %s [SHA-384: %s]", path_to_tsv, file_hash)
 
-    # TODO: check if already imported
-    ds = DictionarySource.objects.get(abbrv="Starlight")
-    if ds.last_import_sha384 == file_hash:
-        logger.info("Already imported %s; skipping...", path_to_tsv)
-        return
+    # Check if already imported
+    try:
+        ds = DictionarySource.objects.get(abbrv="Starlight")
+    except DictionarySource.DoesNotExist:
+        logger.info("Importing for the first time!")
+    else:
+        if ds.last_import_sha384 == file_hash:
+            logger.info("Already imported %s; skipping...", path_to_tsv)
+            return
 
     starlight = DictionarySource(
         abbrv="Starlight",
@@ -56,11 +60,11 @@ def import_dictionary() -> None:
         last_import_sha384=file_hash,
     )
 
+    Definition2Source = Definition.citations.through
+
     heads: Dict[int, Head] = {}
     definitions: Dict[int, Definition] = {}
-
-    starlight_definition: Set[int] = set()
-    sapir_defintion: Set[int] = set()
+    mappings: Set[Tuple[int, int]] = set()
 
     entries = csv.DictReader(tsv_file, delimiter="\t")
     for entry in entries:
@@ -78,28 +82,28 @@ def import_dictionary() -> None:
         if starlight_def:
             pk = make_primary_key(starlight_def, str(head.pk))
             dfn = Definition(pk=pk, text=starlight_def, defines=head)
-            starlight_definition.add(pk)
             definitions[pk] = dfn
+            mappings.add((pk, starlight.pk))
 
         sapir_def = nfc(entry["Sapir - English transcription"])
         if sapir_def:
             pk = make_primary_key(sapir_def, str(head.pk))
             dfn = Definition(pk=pk, text=sapir_def, defines=head)
-            sapir_defintion.add(pk)
             definitions[pk] = dfn
+            mappings.add((pk, sapir.pk))
 
     logger.info(
-        "will insert: heads: %d, defs: %d [starlight: %d] [sapir: %d]",
-        len(heads),
-        len(definitions),
-        len(starlight_definition),
-        len(sapir_defintion),
+        "will insert: heads: %d, defs: %d", len(heads), len(definitions),
     )
 
     with transaction.atomic():
         DictionarySource.objects.bulk_create([starlight, sapir])
         Head.objects.bulk_create(heads.values())
         Definition.objects.bulk_create(definitions.values())
+        Definition2Source.objects.bulk_create(
+            Definition2Source(definition_id=def_pk, dictionarysource_id=dict_pk)
+            for def_pk, dict_pk in mappings
+        )
 
     logger.info("Done importing from %s", path_to_tsv)
 
