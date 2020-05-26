@@ -14,6 +14,20 @@ from .utils import shared_res_dir
 logger = logging.getLogger(__name__)
 
 
+class MorphoDictConfig(AppConfig):
+    # TODO: This should not be in "apps.morphodict..."
+    name = "apps.morphodict"
+    verbose_name = "Morphological Dictionary"
+
+    def ready(self):
+        """
+        This function is called prior to app start.
+        It initializes fuzzy search (build the data structure).
+        It also hashes preverbs for faster preverb matching.
+        """
+        initialize_affix_search()
+
+
 def initialize_affix_search():
     """
     build tries and attach to Wordform class to facilitate prefix/suffix search
@@ -42,17 +56,3 @@ def initialize_affix_search():
 
     Wordform.affix_searcher = AffixSearcher(lowered_no_diacritics_text_with_id)
     logger.info("Finished building tries")
-
-
-class MorphoDictConfig(AppConfig):
-    # TODO: This should not be in "apps.morphodict..."
-    name = "apps.morphodict"
-    verbose_name = "Morphological Dictionary"
-
-    def ready(self):
-        """
-        This function is called prior to app start.
-        It initializes fuzzy search (build the data structure).
-        It also hashes preverbs for faster preverb matching.
-        """
-        initialize_affix_search()
