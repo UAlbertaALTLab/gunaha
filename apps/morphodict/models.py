@@ -22,6 +22,10 @@ from .schema import SerializedDefinition, SerializedSearchResult, SerializedWord
 logger = logging.getLogger(__name__)
 
 
+NormatizedCree = NewType("NormatizedCree", str)
+MatchedEnglish = NewType("MatchedEnglish", str)
+
+
 @attrs(auto_attribs=True, frozen=True)  # frozen makes it hashable
 class SearchResult:
     """
@@ -67,54 +71,9 @@ class SearchResult:
         return cast(SerializedSearchResult, result)
 
 
-NormatizedCree = NewType("NormatizedCree", str)
-MatchedEnglish = NewType("MatchedEnglish", str)
-
-
 class Wordform(models.Model):
     # initialized in apps.py
     affix_searcher: AffixSearcher
-
-    def get_absolute_url(self) -> str:
-        """
-        :return: url that looks like
-         "/words/nipaw" "/words/nipâw?pos=xx" "/words/nipâw?full_lc=xx" "/words/nipâw?analysis=xx" "/words/nipâw?id=xx"
-         it's the least strict url that guarantees unique match in the database
-        """
-        assert self.is_lemma, "There is no page for non-lemmas"
-        lemma_url = reverse(
-            "cree-dictionary-index-with-lemma", kwargs={"lemma_text": self.text}
-        )
-        if self.homograph_disambiguator is not None:
-            lemma_url += f"?{self.homograph_disambiguator}={getattr(self, self.homograph_disambiguator)}"
-
-        return iri_to_uri(lemma_url)
-
-    def serialize(self) -> SerializedWordform:
-        """
-
-        :return: json parsable result
-        """
-        result = model_to_dict(self)
-        result["definitions"] = [
-            definition.serialize() for definition in self.definitions.all()
-        ]
-        result["lemma_url"] = self.get_absolute_url()
-        return result
-
-    @cached_property
-    def homograph_disambiguator(self) -> Optional[str]:
-        """
-        :return: the least strict field name that guarantees unique match together with the text field.
-            could be pos, full_lc, analysis, id or None when the text is enough to disambiguate
-        """
-        homographs = Wordform.objects.filter(text=self.text)
-        if homographs.count() == 1:
-            return None
-        for field in "pos", "full_lc", "analysis":
-            if homographs.filter(**{field: getattr(self, field)}).count() == 1:
-                return field
-        return "id"  # id always guarantees unique match
 
     # override pk to allow use of bulk_create
     # auto-increment is also implemented in the overridden save() method below
@@ -177,6 +136,47 @@ class Wordform(models.Model):
     def __repr__(self):
         cls_name = type(self).__name__
         return f"<{cls_name}: {self.text} {self.analysis}>"
+
+    def get_absolute_url(self) -> str:
+        """
+        :return: url that looks like
+         "/words/nipaw" "/words/nipâw?pos=xx" "/words/nipâw?full_lc=xx" "/words/nipâw?analysis=xx" "/words/nipâw?id=xx"
+         it's the least strict url that guarantees unique match in the database
+        """
+        assert self.is_lemma, "There is no page for non-lemmas"
+        lemma_url = reverse(
+            "cree-dictionary-index-with-lemma", kwargs={"lemma_text": self.text}
+        )
+        if self.homograph_disambiguator is not None:
+            lemma_url += f"?{self.homograph_disambiguator}={getattr(self, self.homograph_disambiguator)}"
+
+        return iri_to_uri(lemma_url)
+
+    def serialize(self) -> SerializedWordform:
+        """
+
+        :return: json parsable result
+        """
+        result = model_to_dict(self)
+        result["definitions"] = [
+            definition.serialize() for definition in self.definitions.all()
+        ]
+        result["lemma_url"] = self.get_absolute_url()
+        return result
+
+    @cached_property
+    def homograph_disambiguator(self) -> Optional[str]:
+        """
+        :return: the least strict field name that guarantees unique match together with the text field.
+            could be pos, full_lc, analysis, id or None when the text is enough to disambiguate
+        """
+        homographs = Wordform.objects.filter(text=self.text)
+        if homographs.count() == 1:
+            return None
+        for field in "pos", "full_lc", "analysis":
+            if homographs.filter(**{field: getattr(self, field)}).count() == 1:
+                return field
+        return "id"  # id always guarantees unique match
 
     @transaction.atomic
     def save(self, *args, **kwargs):
@@ -370,93 +370,7 @@ class Wordform(models.Model):
         return results
 
 
-# it's a str when the preverb does not exist in the database
-Preverb = Union[Wordform, str]
-
-
-def sort_by_user_query(user_query: str) -> Callable[[Any], Any]:
-    """
-    Returns a key function that sorts search results ranked by their distance
-    to the user query.
-    """
-    # mypy doesn't really know how to handle partial(), so we tell it the
-    # correct type with cast()
-    # See: https://github.com/python/mypy/issues/1484
-    return cmp_to_key(
-        cast(
-            Callable[[Any, Any], Any],
-            partial(sort_search_result, user_query=user_query),
-        )
-    )
-
-
 Lemma = NewType("Lemma", Wordform)
-
-
-class CreeResult(NamedTuple):
-    """
-    - analysis: a string, fst analysis of normatized cree
-
-    - normatized_cree: a wordform, the Cree inflection that matches the analysis
-        Can be a string that's not saved in the database since our database do not store all the
-        weird inflections
-
-    - lemma: a Wordform object, the lemma of the matched inflection
-    """
-
-    analysis: ConcatAnalysis
-    normatized_cree: Union[Wordform, str]
-    lemma: Lemma
-
-    @property
-    def normatized_cree_text(self) -> str:
-        if isinstance(self.normatized_cree, Wordform):
-            return self.normatized_cree.text
-        else:  # is str
-            return self.normatized_cree
-
-
-class EnglishResult(NamedTuple):
-    """
-    - matched_english: a string, the English that matches user query, currently it will just be the same as user query.
-        (unicode normalized, lowercased)
-
-    - normatized_cree: a string, the Cree inflection that matches the English
-
-    - lemma: a Wordform object, the lemma of the matched inflection
-    """
-
-    matched_english: MatchedEnglish
-    matched_cree: Wordform
-    lemma: Lemma
-
-
-def sort_search_result(
-    res_a: SearchResult, res_b: SearchResult, user_query: str
-) -> float:
-    """
-    determine how we sort search results.
-
-    :return:   0: does not matter;
-              >0: res_a should appear after res_b;
-              <0: res_a should appear before res_b.
-    """
-    # TODO: implement this!
-    return 0
-
-
-class CreeAndEnglish(NamedTuple):
-    """
-    Duct tapes together two kinds of search results:
-
-     - cree results -- an ordered set of CreeResults, should be sorted by the modified levenshtein distance between the
-        analysis and the matched normatized form
-     - english results -- an ordered set of EnglishResults, sorting mechanism is to be determined
-    """
-
-    # MatchedCree are inflections
-    cree_results: Set[CreeResult]
-    english_results: Set[EnglishResult]
 
 
 class DictionarySource(models.Model):
@@ -571,3 +485,85 @@ class EnglishKeyword(models.Model):
 
     class Meta:
         indexes = [models.Index(fields=["text"])]
+
+
+class CreeResult(NamedTuple):
+    """
+    - analysis: a string, fst analysis of normatized cree
+
+    - normatized_cree: a wordform, the Cree inflection that matches the analysis
+        Can be a string that's not saved in the database since our database do not store all the
+        weird inflections
+
+    - lemma: a Wordform object, the lemma of the matched inflection
+    """
+
+    analysis: ConcatAnalysis
+    normatized_cree: Union[Wordform, str]
+    lemma: Lemma
+
+    @property
+    def normatized_cree_text(self) -> str:
+        if isinstance(self.normatized_cree, Wordform):
+            return self.normatized_cree.text
+        else:  # is str
+            return self.normatized_cree
+
+
+class EnglishResult(NamedTuple):
+    """
+    - matched_english: a string, the English that matches user query, currently it will just be the same as user query.
+        (unicode normalized, lowercased)
+
+    - normatized_cree: a string, the Cree inflection that matches the English
+
+    - lemma: a Wordform object, the lemma of the matched inflection
+    """
+
+    matched_english: MatchedEnglish
+    matched_cree: Wordform
+    lemma: Lemma
+
+
+class CreeAndEnglish(NamedTuple):
+    """
+    Duct tapes together two kinds of search results:
+
+     - cree results -- an ordered set of CreeResults, should be sorted by the modified levenshtein distance between the
+        analysis and the matched normatized form
+     - english results -- an ordered set of EnglishResults, sorting mechanism is to be determined
+    """
+
+    # MatchedCree are inflections
+    cree_results: Set[CreeResult]
+    english_results: Set[EnglishResult]
+
+
+def sort_by_user_query(user_query: str) -> Callable[[Any], Any]:
+    """
+    Returns a key function that sorts search results ranked by their distance
+    to the user query.
+    """
+    # mypy doesn't really know how to handle partial(), so we tell it the
+    # correct type with cast()
+    # See: https://github.com/python/mypy/issues/1484
+    return cmp_to_key(
+        cast(
+            Callable[[Any, Any], Any],
+            partial(sort_search_result, user_query=user_query),
+        )
+    )
+
+
+def sort_search_result(
+    res_a: SearchResult, res_b: SearchResult, user_query: str
+) -> float:
+    """
+    determine how we sort search results.
+
+    :return:   0: does not matter;
+              >0: res_a should appear after res_b;
+              <0: res_a should appear before res_b.
+    """
+    # TODO: implement this!
+    return 0
