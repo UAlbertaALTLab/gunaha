@@ -145,6 +145,19 @@ Django = ">=1.5"
 
 [[package]]
 category = "dev"
+description = "Mypy stubs for Django"
+name = "django-stubs"
+optional = false
+python-versions = ">=3.6"
+version = "1.5.0"
+
+[package.dependencies]
+django = "*"
+mypy = ">=0.770,<0.780"
+typing-extensions = "*"
+
+[[package]]
+category = "dev"
 description = "A platform independent file lock."
 name = "filelock"
 optional = false
@@ -189,7 +202,6 @@ version = "8.3.0"
 [[package]]
 category = "dev"
 description = "Optional static typing for Python"
-marker = "python_version >= \"3.8\""
 name = "mypy"
 optional = false
 python-versions = ">=3.5"
@@ -472,7 +484,7 @@ python-versions = "*"
 version = "0.1.9"
 
 [metadata]
-content-hash = "5a80755509c5d041d1eacd5945eebed7d67f086e849a9cb2c06f0cd018d32362"
+content-hash = "f4c0f9d9a275da8ff28de5d00a90a09e50ff8f2257572dbb511b0d4cd2aa3d29"
 python-versions = "^3.8"
 
 [metadata.files]
@@ -556,6 +568,10 @@ django-debug-toolbar = [
 django-js-reverse = [
     {file = "django-js-reverse-0.9.1.tar.gz", hash = "sha256:2a392d169f44e30b883c30dfcfd917a14167ce8fe196c99d2385b31c90d77aa0"},
     {file = "django_js_reverse-0.9.1-py2.py3-none-any.whl", hash = "sha256:8134c2ab6307c945edfa90671ca65e85d6c1754d48566bdd6464be259cc80c30"},
+]
+django-stubs = [
+    {file = "django-stubs-1.5.0.tar.gz", hash = "sha256:b4c9042f2c2fcb89dc0fb37df070cce0f9bf93b39ae193847b6e5a392b13c430"},
+    {file = "django_stubs-1.5.0-py3-none-any.whl", hash = "sha256:4a03df70e062f4133085efc461148d0934f36ccfd60a2b6d7bc35821f62008b6"},
 ]
 filelock = [
     {file = "filelock-3.0.12-py3-none-any.whl", hash = "sha256:929b7d63ec5b7d6b71b0fa5ac14e030b3f70b75747cef1b10da9b879fef15836"},
