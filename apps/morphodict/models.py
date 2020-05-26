@@ -2,6 +2,7 @@ from django.db import models
 
 MAX_HEAD_LENGTH = 64
 MAX_DEFINITION_LENGTH = 256
+BITS_PER_HEX_CHAR = 4
 
 
 class Head(models.Model):
@@ -59,9 +60,9 @@ class DictionarySource(models.Model):
         null=False,
         blank=False,
     )
-    last_import_sha512 = models.CharField(
-        max_length=512,
-        help_text="SHA-512 hash of the imported file",
+    last_import_sha384 = models.CharField(
+        max_length=384 // BITS_PER_HEX_CHAR,
+        help_text="SHA-384 hash (hexadecimal) of the imported file",
         null=False,
         blank=False,
         editable=False,
