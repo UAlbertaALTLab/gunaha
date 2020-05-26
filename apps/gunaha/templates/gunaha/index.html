@@ -1,10 +1,32 @@
 <!DOCTYPE html>
-<html>
-  <head>
-    <meta charset="UTF-8">
-    <title>Gúnahà</title>
-  </head>
-  <body>
-    <h1>Danit‘ada!</h1>
-  </body>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Gúnahà</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@exampledev/new.css@1.1.2/new.min.css">
+  <style>
+    cite { font-variant: all-small-caps }
+  </style>
+</head>
+<body>
+  <h1>Gúnahà</h1>
+  {% spaceless %}
+  <dl>
+  {% for term in terms %}
+  <dt>
+    <dfn lang="srs">{{ term.text }}</dfn>
+    {% if term.word_class %}
+      ({{ term.word_class }})
+    {% endif %}
+    {% for dfn in term.definitions.all %}
+    <dd>{{ dfn.text }}
+      {% for source in dfn.citations.all %}
+      <cite>{{ source.abbrv }}</cite>
+      {%endfor %}
+    {% endfor %}
+  {% endfor %}
+  </dl>
+  {% endspaceless %}
+</body>
 </html>
