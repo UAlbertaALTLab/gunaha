@@ -15,7 +15,7 @@ logger = logging.getLogger(__name__)
 
 
 class MorphoDictConfig(AppConfig):
-    # TODO: This should not be in "apps.morphodict..."
+    # TODO: This name shoule not namespaced under "apps."
     name = "apps.morphodict"
     verbose_name = "Morphological Dictionary"
 
@@ -43,16 +43,27 @@ def initialize_affix_search():
         {"â": "a", "ā": "a", "ê": "e", "ē": "e", "ī": "i", "î": "i", "ô": "o", "ō": "o"}
     )
     try:
-        lowered_no_diacritics_text_with_id = [
-            ("".join([cree_letter_to_ascii.get(c, c) for c in text.lower()]), wf_id)
-            for text, wf_id in Wordform.objects.filter(is_lemma=True).values_list(
-                "text", "id"
-            )
-        ]
+        lowered_no_diacritics_text_with_id = normalize_orthography(
+            Wordform.objects.filter(is_lemma=True).values_list("text", "id")
+        )
+    except OperationalError:
         # apps.py will also get called during migration, it's possible that neither Wordform table nor text field
         # exists. Then an OperationalError will occur.
-    except OperationalError:
+        logger.exception("Skipped building trie")
         return
 
     Wordform.affix_searcher = AffixSearcher(lowered_no_diacritics_text_with_id)
     logger.info("Finished building tries")
+
+
+def normalize_orthography(generator):
+    cree_letter_to_ascii = {
+        ascii_letter: ascii_letter for ascii_letter in string.ascii_lowercase
+    }
+    cree_letter_to_ascii.update(
+        {"â": "a", "ā": "a", "ê": "e", "ē": "e", "ī": "i", "î": "i", "ô": "o", "ō": "o"}
+    )
+    return [
+        ("".join([cree_letter_to_ascii.get(c, c) for c in text.lower()]), wf_id)
+        for text, wf_id in generator
+    ]
