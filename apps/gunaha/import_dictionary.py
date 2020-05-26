@@ -4,9 +4,11 @@
 import csv
 import io
 import logging
+import re
+from collections import defaultdict
 from hashlib import sha384
 from pathlib import Path
-from typing import List
+from typing import Dict, Set
 from unicodedata import normalize
 
 from apps.morphodict.models import Definition, DictionarySource, Head
@@ -49,13 +51,24 @@ def import_dictionary() -> None:
     )
 
     entries = csv.DictReader(tsv_file, delimiter="\t")
-    terms: List[Head] = []
+    terms: Dict[int, Head] = {}
+    definitions: Set[Definition] = set()
+    pat = re.compile(r"""os(\d+)\w?""")
     for entry in entries:
         folio_id = entry["ID"]
-        assert folio_id.startswith("os")  # for "Onespot"
         # deal with duplicate ids...
-        primary_key = int(folio_id[2:], base=10)
+        match = pat.match(folio_id)
+        assert match is not None
+        primary_key = int(match.group(1), base=10)
         term = normalize("NFC", entry["Bruce - Tsuut'ina text"])
         word_class = entry["Part of speech"]
         starlight_def = entry["Bruce - English text"]
-        terms.append(Head(pk=primary_key, text=term, word_class=word_class))
+        head = terms.setdefault(
+            primary_key, Head(pk=primary_key, text=term, word_class=word_class)
+        )
+        if head.text and term:
+            assert head.text == term, f"mismatch: {head} / {term}"
+        if not head.word_class:
+            head.word_class = word_class
+        elif head.word_class and word_class:
+            assert head.word_class == word_class, f"mismatch: {head} / {word_class}"

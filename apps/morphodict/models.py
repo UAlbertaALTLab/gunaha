@@ -22,6 +22,11 @@ class Head(models.Model):
         unique_together = ("text", "word_class")
 
 
+    def __str__(self) -> str:
+        return f"{self.text} ({self.word_class})"
+
+
+
 class DictionarySource(models.Model):
     """
     Represents bibliographic information for a set of definitions.
