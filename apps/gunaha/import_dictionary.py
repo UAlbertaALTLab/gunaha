@@ -44,7 +44,7 @@ def import_dictionary() -> None:
     onespot = DictionarySource(
         abbrv="Onespot",
         title="Onespot-Sapir vocabulary list",
-        editor="John Onespot, Bruce Starlight, Edward Sapir",
+        editor="Bruce Starlight, John Onespot, Edward Sapir",
         import_filename=filename,
         last_import_sha384=file_hash,
     )
@@ -57,7 +57,7 @@ def import_dictionary() -> None:
 
     entries = csv.DictReader(tsv_file, delimiter="\t")
     for entry in entries:
-        term = nfc(entry["Bruce - Tsuut'ina text"])
+        term = normalize_orthography(entry["Bruce - Tsuut'ina text"])
 
         if term.startswith("*"):
             logger.debug("Skipping ungrammatical form: %r", term)
@@ -67,6 +67,9 @@ def import_dictionary() -> None:
         head = heads.setdefault(
             primary_key, Head(pk=primary_key, text=term, word_class=word_class)
         )
+
+        # TODO: tag certain words as "not suitable for school" -- I guess NSFW?
+        # TODO: tag heads with "Folio" -- more specifically where the word came from
 
         definition = nfc(entry["Bruce - English text"])
         if not definition:
@@ -91,6 +94,19 @@ def import_dictionary() -> None:
         )
 
     logger.info("Done importing from %s", path_to_tsv)
+
+
+def normalize_orthography(tsuutina_word: str) -> str:
+    LATIN_SMALL_LETTER_L_WITH_MIDDLE_TIDLE = "\u026B"
+    LATIN_SMALL_LETTER_L_WITH_STROKE = "\u0142"
+    tsuutina_word = tsuutina_word.strip()
+    tsuutina_word = nfc(tsuutina_word)
+    # According to Chris Cox: Original mostly used <ɫ>, but writers now prefer
+    # <ł>, as it is more distinct from <t>. So let's make it consistent!
+    tsuutina_word = tsuutina_word.replace(
+        LATIN_SMALL_LETTER_L_WITH_MIDDLE_TIDLE, LATIN_SMALL_LETTER_L_WITH_STROKE
+    )
+    return tsuutina_word
 
 
 def nfc(text: str) -> str:
