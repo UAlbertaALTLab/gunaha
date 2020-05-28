@@ -20,28 +20,44 @@ from environs import Env
 env = Env()
 env.read_env()
 
-
 # Buile paths inside the project like this: BASE_PATH / 'path' / 'to' / 'file'
 BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 BASE_PATH = Path(BASE_DIR).resolve()
 
-# Where persistent data will be placed
-DATA_DIR = env.path("DATA_DIR", os.fspath(BASE_PATH))
-assert DATA_DIR.is_dir()
 
-# Quick-start development settings - unsuitable for production
+########################### ENVIRONMENT VARIABLES ############################
+
+# General settings
+
+# Django would like you to refer to this document before deploy:
 # See https://docs.djangoproject.com/en/2.2/howto/deployment/checklist/
 
-# SECURITY WARNING: keep the secret key used in production secret!
-SECRET_KEY = env("SECRET_KEY")
-
-# SECURITY WARNING: don't run with debug turned on in production!
+# Enable Django debug: leave this off in production
 DEBUG = env.bool("DEBUG", False)
 
-ALLOWED_HOSTS: List[str] = env.list("ALLOWED_HOSTS", [])
+# The encryption key! Please keep this secret!
+SECRET_KEY = env("SECRET_KEY")
+
+# How noisy should the console logs be.
+LOG_LEVEL = env.log_level("LOG_LEVEL", "WARN")
+
+# Which domains can access this site?
+ALLOWED_HOSTS: List[str] = env.list("ALLOWED_HOSTS", ["localhost"])
+
+# Where persistent data will be placed
+DATA_DIR = env.path("DATA_DIR", os.fspath(BASE_PATH))
 
 
-# Application definition
+################################# VALIDATION #################################
+
+# Let's make sure of some things first:
+assert DATA_DIR.is_dir()
+
+
+##################### REQUIRED SETTINGS FOR APPLICATIONS #####################
+
+
+# Applications required for this site:
 
 INSTALLED_APPS = [
     "django.contrib.admin",
@@ -135,5 +151,5 @@ LOGGING = {
     "version": 1,
     "disable_existing_loggers": False,
     "handlers": {"console": {"class": "logging.StreamHandler",},},
-    "root": {"handlers": ["console"], "level": env.log_level("LOG_LEVEL", "WARN"),},
+    "root": {"handlers": ["console"], "level": LOG_LEVEL,},
 }
