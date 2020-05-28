@@ -11,6 +11,7 @@ https://docs.djangoproject.com/en/2.2/ref/settings/
 """
 
 import os
+from pathlib import Path
 from typing import List
 
 from environs import Env
@@ -20,9 +21,13 @@ env = Env()
 env.read_env()
 
 
-# Build paths inside the project like this: os.path.join(BASE_DIR, ...)
+# Buile paths inside the project like this: BASE_PATH / 'path' / 'to' / 'file'
 BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+BASE_PATH = Path(BASE_DIR).resolve()
 
+# Where persistent data will be placed
+DATA_DIR = env.path("DATA_DIR", os.fspath(BASE_PATH))
+assert DATA_DIR.is_dir()
 
 # Quick-start development settings - unsuitable for production
 # See https://docs.djangoproject.com/en/2.2/howto/deployment/checklist/
@@ -31,9 +36,9 @@ BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 SECRET_KEY = env("SECRET_KEY")
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = True
+DEBUG = env.bool("DEBUG", False)
 
-ALLOWED_HOSTS: List[str] = []
+ALLOWED_HOSTS: List[str] = env.list("ALLOWED_HOSTS", [])
 
 
 # Application definition
@@ -86,7 +91,7 @@ WSGI_APPLICATION = "gunahasite.wsgi.application"
 DATABASES = {
     "default": {
         "ENGINE": "django.db.backends.sqlite3",
-        "NAME": os.path.join(BASE_DIR, "db.sqlite3"),
+        "NAME": os.fspath(DATA_DIR / "db.sqlite3"),
     }
 }
 
@@ -107,9 +112,12 @@ AUTH_PASSWORD_VALIDATORS = [
 # Internationalization
 # https://docs.djangoproject.com/en/2.2/topics/i18n/
 
-LANGUAGE_CODE = "en-us"
+LANGUAGE_CODE = "en-ca"
 
-TIME_ZONE = "UTC"
+# Alberta time zone.
+# (developers are in Edmonton)
+# (community is in Tsuut'ina Nation, near Calgary)
+TIME_ZONE = "America/Edmonton"
 
 USE_I18N = True
 
@@ -127,5 +135,5 @@ LOGGING = {
     "version": 1,
     "disable_existing_loggers": False,
     "handlers": {"console": {"class": "logging.StreamHandler",},},
-    "root": {"handlers": ["console"], "level": "DEBUG",},
+    "root": {"handlers": ["console"], "level": env.log_level("LOG_LEVEL", "WARN"),},
 }
