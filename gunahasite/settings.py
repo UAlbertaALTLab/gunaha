@@ -10,6 +10,7 @@ For the full list of settings and their values, see
 https://docs.djangoproject.com/en/2.2/ref/settings/
 """
 
+import logging.config
 import os
 from pathlib import Path
 from typing import List
@@ -148,9 +149,27 @@ USE_TZ = True
 
 STATIC_URL = "/static/"
 
-LOGGING = {
-    "version": 1,
-    "disable_existing_loggers": False,
-    "handlers": {"console": {"class": "logging.StreamHandler",},},
-    "root": {"handlers": ["console"], "level": LOG_LEVEL,},
-}
+################################## Logging ###################################
+
+# Disable default Django logging:
+LOGGING_CONFIG = None
+
+# Opionionated logger: the only setting is log level.
+# View these in docker with:
+#
+#   docker logs
+logging.config.dictConfig(
+    {
+        "version": 1,
+        "disable_existing_loggers": False,
+        "formatters": {
+            "console": {
+                "format": "%(asctime)s %(levelname)-8s %(process)d [%(name)s:%(lineno)s]: %(message)s"
+            },
+        },
+        "handlers": {
+            "console": {"class": "logging.StreamHandler", "formatter": "console"},
+        },
+        "loggers": {"apps": {"handlers": ["console"], "level": LOG_LEVEL,},},
+    }
+)
