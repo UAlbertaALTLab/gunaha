@@ -11,6 +11,7 @@ from pathlib import Path
 from typing import Dict, Set, Tuple
 from unicodedata import normalize
 
+from django.conf import settings
 from django.db import transaction
 from django.db.utils import OperationalError
 
@@ -18,15 +19,16 @@ from apps.morphodict.models import Definition, DictionarySource, Head
 
 logger = logging.getLogger(__name__)
 
-private_dir = Path(__name__).parent.parent.parent / "run" / "private"
-assert private_dir.exists()
+private_dir = settings.DATA_DIR / "private"
 
 
 def import_dictionary() -> None:
     logger.info("Importing OneSpot-Sapir vocabulary list")
     filename = "Onespot-Sapir-Vocabulary-list-OS-Vocabulary.tsv"
     path_to_tsv = private_dir / filename
-    assert path_to_tsv.exists()
+    if not path_to_tsv.exists():
+        logger.warn("Cannot find dictionary file @ %s. Skipping...", path_to_tsv)
+        return
 
     with open(path_to_tsv, "rb") as raw_file:
         raw_bytes = raw_file.read()
