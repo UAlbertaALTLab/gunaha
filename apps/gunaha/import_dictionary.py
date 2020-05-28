@@ -23,7 +23,7 @@ assert private_dir.exists()
 
 
 def import_dictionary() -> None:
-    logger.info("Importing Sapir OneSpot dictionary")
+    logger.info("Importing OneSpot-Sapir vocabulary list")
     filename = "Onespot-Sapir-Vocabulary-list-OS-Vocabulary.tsv"
     path_to_tsv = private_dir / filename
     assert path_to_tsv.exists()
@@ -41,9 +41,10 @@ def import_dictionary() -> None:
         logger.info("Already imported %s; skipping...", path_to_tsv)
         return
 
-    starlight = DictionarySource(
-        abbrv="Starlight",
-        editor="Bruce Starlight",
+    onespot = DictionarySource(
+        abbrv="Onespot",
+        title="Onespot-Sapir vocabulary list",
+        editor="John Onespot, Bruce Starlight, Edward Sapir",
         import_filename=filename,
         last_import_sha384=file_hash,
     )
@@ -74,14 +75,14 @@ def import_dictionary() -> None:
         pk = make_primary_key(definition, str(head.pk))
         dfn = Definition(pk=pk, text=definition, defines=head)
         definitions[pk] = dfn
-        mappings.add((pk, starlight.pk))
+        mappings.add((pk, onespot.pk))
 
     logger.info(
         "Will insert: heads: %d, defs: %d", len(heads), len(definitions),
     )
 
     with transaction.atomic():
-        DictionarySource.objects.bulk_create([starlight])
+        DictionarySource.objects.bulk_create([onespot])
         Head.objects.bulk_create(heads.values())
         Definition.objects.bulk_create(definitions.values())
         Definition2Source.objects.bulk_create(
@@ -103,7 +104,7 @@ def make_primary_key(*args: str) -> int:
 
 def should_import_onespot(file_hash: str) -> bool:
     try:
-        ds = DictionarySource.objects.get(abbrv="Starlight")
+        ds = DictionarySource.objects.get(abbrv="Onespot")
     except OperationalError:
         logger.error("Database does not yet exist...")
         return False
