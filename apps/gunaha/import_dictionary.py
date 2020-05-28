@@ -11,9 +11,8 @@ from pathlib import Path
 from typing import Dict, Set, Tuple
 from unicodedata import normalize
 
-from django.db import transaction
-
 from apps.morphodict.models import Definition, DictionarySource, Head
+from django.db import transaction
 
 logger = logging.getLogger(__name__)
 
@@ -36,15 +35,9 @@ def import_dictionary() -> None:
 
     logger.info("Importing %s [SHA-384: %s]", path_to_tsv, file_hash)
 
-    # Check if already imported
-    try:
-        ds = DictionarySource.objects.get(abbrv="Starlight")
-    except DictionarySource.DoesNotExist:
-        logger.info("Importing for the first time!")
-    else:
-        if ds.last_import_sha384 == file_hash:
-            logger.info("Already imported %s; skipping...", path_to_tsv)
-            return
+    if not should_import_onespot(file_hash):
+        logger.info("Already imported %s; skipping...", path_to_tsv)
+        return
 
     starlight = DictionarySource(
         abbrv="Starlight",
@@ -115,3 +108,15 @@ def nfc(text: str) -> str:
 def make_primary_key(*args: str) -> int:
     number = int(sha1("\n".join(args).encode("UTF-8")).hexdigest(), base=16)
     return number & 0xFFFFFFFF
+
+
+def should_import_onespot(file_hash: str) -> bool:
+    try:
+        ds = DictionarySource.objects.get(abbrv="Starlight")
+    except DictionarySource.DoesNotExist:
+        logger.info("Importing for the first time!")
+        return True
+
+    if ds.last_import_sha384 == file_hash:
+        return False
+    return True
