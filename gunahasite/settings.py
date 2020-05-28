@@ -72,8 +72,8 @@ INSTALLED_APPS = [
     "django.contrib.sessions",
     "django.contrib.messages",
     "django.contrib.staticfiles",
-    "apps.gunaha",
-    "apps.morphodict",
+    "apps.gunaha.apps.GunahaConfig",
+    "apps.morphodict.apps.MorphoDictConfig",
 ]
 
 MIDDLEWARE = [
