@@ -11,8 +11,10 @@ from pathlib import Path
 from typing import Dict, Set, Tuple
 from unicodedata import normalize
 
-from apps.morphodict.models import Definition, DictionarySource, Head
 from django.db import transaction
+from django.db.utils import OperationalError
+
+from apps.morphodict.models import Definition, DictionarySource, Head
 
 logger = logging.getLogger(__name__)
 
@@ -46,13 +48,6 @@ def import_dictionary() -> None:
         last_import_sha384=file_hash,
     )
 
-    sapir = DictionarySource(
-        abbrv="Sapir",
-        editor="Edward Sapir",
-        import_filename=filename,
-        last_import_sha384=file_hash,
-    )
-
     Definition2Source = Definition.citations.through
 
     heads: Dict[int, Head] = {}
@@ -61,36 +56,32 @@ def import_dictionary() -> None:
 
     entries = csv.DictReader(tsv_file, delimiter="\t")
     for entry in entries:
-        folio_id = entry["ID"]
-
         term = nfc(entry["Bruce - Tsuut'ina text"])
-        word_class = entry["Part of speech"]
 
+        if term.startswith("*"):
+            logger.debug("Skipping ungrammatical form: %r", term)
+
+        word_class = entry["Part of speech"]
         primary_key = make_primary_key(term, word_class)
         head = heads.setdefault(
             primary_key, Head(pk=primary_key, text=term, word_class=word_class)
         )
 
-        starlight_def = nfc(entry["Bruce - English text"])
-        if starlight_def:
-            pk = make_primary_key(starlight_def, str(head.pk))
-            dfn = Definition(pk=pk, text=starlight_def, defines=head)
-            definitions[pk] = dfn
-            mappings.add((pk, starlight.pk))
+        definition = nfc(entry["Bruce - English text"])
+        if not definition:
+            continue
 
-        sapir_def = nfc(entry["Sapir - English transcription"])
-        if sapir_def:
-            pk = make_primary_key(sapir_def, str(head.pk))
-            dfn = Definition(pk=pk, text=sapir_def, defines=head)
-            definitions[pk] = dfn
-            mappings.add((pk, sapir.pk))
+        pk = make_primary_key(definition, str(head.pk))
+        dfn = Definition(pk=pk, text=definition, defines=head)
+        definitions[pk] = dfn
+        mappings.add((pk, starlight.pk))
 
     logger.info(
-        "will insert: heads: %d, defs: %d", len(heads), len(definitions),
+        "Will insert: heads: %d, defs: %d", len(heads), len(definitions),
     )
 
     with transaction.atomic():
-        DictionarySource.objects.bulk_create([starlight, sapir])
+        DictionarySource.objects.bulk_create([starlight])
         Head.objects.bulk_create(heads.values())
         Definition.objects.bulk_create(definitions.values())
         Definition2Source.objects.bulk_create(
@@ -113,6 +104,9 @@ def make_primary_key(*args: str) -> int:
 def should_import_onespot(file_hash: str) -> bool:
     try:
         ds = DictionarySource.objects.get(abbrv="Starlight")
+    except OperationalError:
+        logger.error("Database does not yet exist...")
+        return False
     except DictionarySource.DoesNotExist:
         logger.info("Importing for the first time!")
         return True
