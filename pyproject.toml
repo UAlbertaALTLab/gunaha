@@ -12,6 +12,7 @@ attrs = "^19.3.0"
 django-js-reverse = "^0.9.1"
 sortedcontainers = {url = "https://eddieantonio.keybase.pub/sortedcontainers-2.1.0.tar.gz"}
 marisa-trie = "^0.7.5"
+environs = "^8.0.0"
 
 [tool.poetry.dev-dependencies]
 black = "^19.10b0"
