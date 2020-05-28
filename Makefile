@@ -17,5 +17,5 @@ env: .env
 .env:
 	python -c 'import secrets; print("export SECRET_KEY=" + secrets.token_hex())' > $@
 
-requirements.txt:
-	poetry run pip freeze > $@
+requirements.txt: poetry.lock
+	poetry export -f requirements.txt --without-hashes -o $@
