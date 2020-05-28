@@ -48,7 +48,7 @@ ALLOWED_HOSTS: List[str] = env.list("ALLOWED_HOSTS", ["localhost"])
 ############################## ENV: DIRECTORIES ##############################
 
 # Where persistent data will be placed
-DATA_DIR = env.path("DATA_DIR", os.fspath(BASE_PATH))
+DATA_DIR = env.path("DATA_DIR", os.fspath(BASE_PATH / "run"))
 
 ############################### ENV: DATABASES ###############################
 
