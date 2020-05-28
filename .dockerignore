@@ -1,0 +1,6 @@
+.env
+/itwewina/
+/run/
+__pycache__/
+.mypy_cache/
+.git/
