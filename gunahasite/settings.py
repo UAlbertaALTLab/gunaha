@@ -44,9 +44,15 @@ LOG_LEVEL = env.log_level("LOG_LEVEL", "WARN")
 # Which domains can access this site?
 ALLOWED_HOSTS: List[str] = env.list("ALLOWED_HOSTS", ["localhost"])
 
+############################## ENV: DIRECTORIES ##############################
+
 # Where persistent data will be placed
 DATA_DIR = env.path("DATA_DIR", os.fspath(BASE_PATH))
 
+############################### ENV: DATABASES ###############################
+
+DATABASE_ENGINE = env("DATABASE_ENGINE", "django.db.backends.sqlite3")
+DATABASE_NAME = env("DATABASE_NAME", os.fspath(DATA_DIR / "db.sqlite3"))
 
 ################################# VALIDATION #################################
 
@@ -104,12 +110,7 @@ WSGI_APPLICATION = "gunahasite.wsgi.application"
 # Database
 # https://docs.djangoproject.com/en/2.2/ref/settings/#databases
 
-DATABASES = {
-    "default": {
-        "ENGINE": "django.db.backends.sqlite3",
-        "NAME": os.fspath(DATA_DIR / "db.sqlite3"),
-    }
-}
+DATABASES = {"default": {"ENGINE": DATABASE_ENGINE, "NAME": DATABASE_NAME,}}
 
 
 # Password validation
