@@ -1,5 +1,11 @@
 FROM python:3.8-slim-buster
 
+ARG WSGI_USER=uwsgi
+RUN groupadd -r ${WSGI_USER} \
+        && useradd --no-log-init -r -g ${WSGI_USER} ${WSGI_USER}
+
+
+# Setup Python deps
 ADD requirements.txt /app/requirements.txt
 
 # Build dependencies, then remove the deps we needed just for building
@@ -32,4 +38,9 @@ ENV SECRET_KEY=$DJANGO_SECRET_KEY DATA_DIR=/data/
 # Where to find the wsgi file:
 ENV UWSGI_WSGI_FILE=gunahasite/wsgi.py
 
+# Essential UWSGI config
+ENV UWSGI_HTTP=:8000 UWSGI_MASTER=1 UWSGI_HTTP_KEEPALIVE=1 UWSGI_AUTO_CHUNKED=1 UWSGI_WSGI_ENV_BEHAVIOUR=holy
+
+# uwsgi CANNOT run as root!
+USER  ${WSGI_USER}:${WSGI_USER}
 CMD ["uwsgi", "--show-config"]

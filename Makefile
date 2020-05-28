@@ -7,6 +7,9 @@ all: build
 build: requirements.txt
 	docker build -t gunaha --build-arg DJANGO_SECRET_KEY=$(DJANGO_SECRET_KEY) .
 
+run-local: build
+	docker run --rm --name=gunaha -p 8000:8000 --mount "type=bind,source=$(shell pwd)/run,target=/data" -e LOG_LEVEL=debug gunaha
+
 env: .env
 
 .PHONY: all build env
