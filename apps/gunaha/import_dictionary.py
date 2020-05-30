@@ -45,12 +45,13 @@ def import_dictionary(purge: bool = False) -> None:
 
     # Purge only once we KNOW we have dictionary content
 
-    with transaction.atomic():
-        logger.warn("Purging ALL existing dictionary content")
-        Definition2Source.objects.all().delete()
-        Definition.objects.all().delete()
-        Head.objects.all().delete()
-        DictionarySource.objects.all().delete()
+    if purge:
+        with transaction.atomic():
+            logger.warn("Purging ALL existing dictionary content")
+            Definition2Source.objects.all().delete()
+            Definition.objects.all().delete()
+            Head.objects.all().delete()
+            DictionarySource.objects.all().delete()
 
     if not should_import_onespot(file_hash):
         logger.info("Already imported %s; skipping...", path_to_tsv)
