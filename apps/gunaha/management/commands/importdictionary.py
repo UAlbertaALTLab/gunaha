@@ -26,6 +26,4 @@ class Command(BaseCommand):
     def handle(self, *args, **options) -> None:
         from apps.gunaha.import_dictionary import import_dictionary
 
-        print(options)
-
         import_dictionary(purge=options["purge"])
