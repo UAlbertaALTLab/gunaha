@@ -14,4 +14,4 @@ class Command(BaseCommand):
     def handle(self, *args, **options) -> None:
         from apps.gunaha.import_dictionary import import_dictionary
 
-        import_dictionary()
+        import_dictionary(purge=True)

@@ -22,11 +22,15 @@ logger = logging.getLogger(__name__)
 private_dir = settings.DATA_DIR / "private"
 
 
-def import_dictionary() -> None:
+def import_dictionary(purge: bool = False) -> None:
+    Definition2Source = Definition.citations.through
+
     logger.info("Importing OneSpot-Sapir vocabulary list")
+
     filename = "Onespot-Sapir-Vocabulary-list-OS-Vocabulary.tsv"
     path_to_tsv = private_dir / filename
     if not path_to_tsv.exists():
+        # TODO: raise an error
         logger.warn("Cannot find dictionary file @ %s. Skipping...", path_to_tsv)
         return
 
@@ -39,6 +43,15 @@ def import_dictionary() -> None:
 
     logger.info("Importing %s [SHA-384: %s]", path_to_tsv, file_hash)
 
+    # Purge only once we KNOW we have dictionary content
+
+    with transaction.atomic():
+        logger.warn("Purging ALL existing dictionary content")
+        Definition2Source.objects.all().delete()
+        Definition.objects.all().delete()
+        Head.objects.all().delete()
+        DictionarySource.objects.all().delete()
+
     if not should_import_onespot(file_hash):
         logger.info("Already imported %s; skipping...", path_to_tsv)
         return
@@ -50,8 +63,6 @@ def import_dictionary() -> None:
         import_filename=filename,
         last_import_sha384=file_hash,
     )
-
-    Definition2Source = Definition.citations.through
 
     heads: Dict[int, Head] = {}
     definitions: Dict[int, Definition] = {}
