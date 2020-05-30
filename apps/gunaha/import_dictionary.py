@@ -73,7 +73,7 @@ def import_dictionary(purge: bool = False) -> None:
     for entry in entries:
         term = normalize_orthography(entry["Bruce - Tsuut'ina text"])
 
-        if should_skip_importing_head(term):
+        if should_skip_importing_head(term, entry):
             continue
 
         word_class = entry["Part of speech"]
@@ -113,6 +113,7 @@ def import_dictionary(purge: bool = False) -> None:
 def normalize_orthography(tsuutina_word: str) -> str:
     LATIN_SMALL_LETTER_L_WITH_MIDDLE_TIDLE = "\u026B"
     LATIN_SMALL_LETTER_L_WITH_STROKE = "\u0142"
+
     tsuutina_word = tsuutina_word.strip()
     tsuutina_word = nfc(tsuutina_word)
     # According to Chris Cox: Original mostly used <ɫ>, but writers now prefer
@@ -127,10 +128,18 @@ def nfc(text: str) -> str:
     return normalize("NFC", text)
 
 
-def should_skip_importing_head(head: str) -> bool:
-    if head.startswith("*"):
+def should_skip_importing_head(head: str, info: dict) -> bool:
+    if head.startswith("*") or head.endswith("*"):
         logger.debug("Skipping ungrammatical form: %r", head)
         return True
+
+    if "??" in head:
+        logger.debug(
+            "Skipping head labelled with '???' (see Folio %s)",
+            info.get("Folio", "<unknown>"),
+        )
+        return True
+
     return False
 
 
