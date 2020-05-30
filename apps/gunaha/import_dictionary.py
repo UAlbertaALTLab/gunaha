@@ -73,8 +73,8 @@ def import_dictionary(purge: bool = False) -> None:
     for entry in entries:
         term = normalize_orthography(entry["Bruce - Tsuut'ina text"])
 
-        if term.startswith("*"):
-            logger.debug("Skipping ungrammatical form: %r", term)
+        if should_skip_importing_head(term):
+            continue
 
         word_class = entry["Part of speech"]
         primary_key = make_primary_key(term, word_class)
@@ -125,6 +125,13 @@ def normalize_orthography(tsuutina_word: str) -> str:
 
 def nfc(text: str) -> str:
     return normalize("NFC", text)
+
+
+def should_skip_importing_head(head: str) -> bool:
+    if head.startswith("*"):
+        logger.debug("Skipping ungrammatical form: %r", head)
+        return True
+    return False
 
 
 def make_primary_key(*args: str) -> int:
