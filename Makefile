@@ -5,12 +5,13 @@ DJANGO_SECRET_KEY ?= $(DEV_SECRET_KEY)
 all: build
 
 build: requirements.txt
-	docker build -t gunaha --build-arg DJANGO_SECRET_KEY=$(DJANGO_SECRET_KEY) .
+	docker build -t gunaha:latest --build-arg DJANGO_SECRET_KEY=$(DJANGO_SECRET_KEY) .
 
 run-local: build
 	docker run --rm --name=gunaha -p 8000:8000 --mount "type=bind,source=$(shell pwd)/run,target=/data" -e LOG_LEVEL=debug gunaha
 
 push: build
+	docker tag gunaha:latest docker.pkg.github.com/ualbertaaltlab/gunaha/gunaha:latest
 	docker push docker.pkg.github.com/ualbertaaltlab/gunaha/gunaha:latest
 
 env: .env
