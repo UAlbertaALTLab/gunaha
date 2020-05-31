@@ -50,5 +50,5 @@ jobs:
         password: ${{ secrets.GITHUB_TOKEN }}
         registry: docker.pkg.github.com
         repository: ualbertaaltlab/gunaha/gunaha
-        tag_with_sha: true
+        # ALWAYS replace the latest tag! 
         tags: latest
