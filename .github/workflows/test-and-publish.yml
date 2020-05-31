@@ -23,9 +23,9 @@ jobs:
     - name: Lint with mypy/black
       run: |
         # Typecheck
-        mypy .
+        poetry run mypy .
         # Lint
-        black --check . --diff --exclude 'migrations/'
+        poetry run black --check . --diff --exclude 'migrations/'
 
   publish_to_registry:
     runs-on: ubuntu-latest
