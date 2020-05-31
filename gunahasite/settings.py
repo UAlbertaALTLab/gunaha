@@ -25,6 +25,8 @@ env.read_env()
 BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 BASE_PATH = Path(BASE_DIR).resolve()
 
+INVALID_SECRET_KEY = object()
+
 
 ########################### ENVIRONMENT VARIABLES ############################
 
@@ -37,7 +39,7 @@ BASE_PATH = Path(BASE_DIR).resolve()
 DEBUG = env.bool("DEBUG", False)
 
 # The encryption key! Please keep this secret!
-SECRET_KEY = env("SECRET_KEY")
+SECRET_KEY = env("SECRET_KEY", INVALID_SECRET_KEY)
 
 # How noisy should the console logs be.
 LOG_LEVEL = env.log_level("LOG_LEVEL", "WARN")
@@ -60,6 +62,16 @@ DATABASE_NAME = env("DATABASE_NAME", os.fspath(DATA_DIR / "db.sqlite3"))
 # Let's make sure of some things first:
 assert DATA_DIR.is_dir()
 
+
+if SECRET_KEY is INVALID_SECRET_KEY:
+    print(
+        "\033[31m" "Warning: no SECRET_KEY set!",
+        " * Using an invalid key to work in development environment",
+        " * only allow connections from localhost (no public access)" "\033[m",
+        sep="\n",
+    )
+    SECRET_KEY = "<invalid>"
+    ALLOWED_HOSTS = ["localhost", "127.0.0.1"]
 
 ##################### REQUIRED SETTINGS FOR APPLICATIONS #####################
 
