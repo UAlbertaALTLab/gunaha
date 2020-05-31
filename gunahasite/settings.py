@@ -59,10 +59,6 @@ DATABASE_NAME = env("DATABASE_NAME", os.fspath(DATA_DIR / "db.sqlite3"))
 
 ################################# VALIDATION #################################
 
-# Let's make sure of some things first:
-assert DATA_DIR.is_dir()
-
-
 if SECRET_KEY is INVALID_SECRET_KEY:
     print(
         "\033[31m" "Warning: no SECRET_KEY set!",
