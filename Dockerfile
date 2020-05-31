@@ -28,12 +28,8 @@ ADD . /app/
 # uWSGI will listen on this port:
 EXPOSE 8000
 
-# TODO: Set appropriate environment variables...
-ARG DJANGO_SECRET_KEY
-ENV SECRET_KEY=$DJANGO_SECRET_KEY DATA_DIR=/data/
-
 # Put the static files in the right place:
-#RUN python manage.py collectstatic --noinput
+# TODO: RUN python manage.py collectstatic --noinput
 
 # Where to find the wsgi file:
 ENV UWSGI_WSGI_FILE=gunahasite/wsgi.py
