@@ -56,6 +56,7 @@ DATA_DIR = env.path("DATA_DIR", os.fspath(BASE_PATH / "run"))
 
 DATABASE_ENGINE = env("DATABASE_ENGINE", "django.db.backends.sqlite3")
 DATABASE_NAME = env("DATABASE_NAME", os.fspath(DATA_DIR / "db.sqlite3"))
+DATABASE_LOG_LEVEL = env.log_level("DATABASE_LOG_LEVEL", "WARN")
 
 ################################# VALIDATION #################################
 
@@ -178,6 +179,9 @@ logging.config.dictConfig(
         "handlers": {
             "console": {"class": "logging.StreamHandler", "formatter": "console"},
         },
-        "loggers": {"apps": {"handlers": ["console"], "level": LOG_LEVEL,},},
+        "loggers": {
+            "apps": {"handlers": ["console"], "level": LOG_LEVEL,},
+            "django.db": {"handlers": ["console"], "level": DATABASE_LOG_LEVEL,},
+        },
     }
 )
