@@ -4,5 +4,5 @@ from apps.morphodict.models import Head
 
 
 def index(request):
-    terms = Head.objects.all()
+    terms = Head.objects.all().prefetch_related("definitions")
     return render(request, "gunaha/index.html", context={"terms": terms})
