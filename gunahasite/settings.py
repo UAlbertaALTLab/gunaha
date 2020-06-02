@@ -54,9 +54,10 @@ DATA_DIR = env.path("DATA_DIR", os.fspath(BASE_PATH / "run"))
 
 ############################### ENV: DATABASES ###############################
 
-DATABASE_ENGINE = env("DATABASE_ENGINE", "django.db.backends.sqlite3")
-DATABASE_NAME = env("DATABASE_NAME", os.fspath(DATA_DIR / "db.sqlite3"))
-DATABASE_LOG_LEVEL = env.log_level("DATABASE_LOG_LEVEL", "WARN")
+with env.prefixed("DATABASE_"):
+    DATABASE_ENGINE = env("ENGINE", "django.db.backends.sqlite3")
+    DATABASE_NAME = env("NAME", os.fspath(DATA_DIR / "db.sqlite3"))
+    DATABASE_LOG_LEVEL = env.log_level("LOG_LEVEL", "WARN")
 
 ################################# VALIDATION #################################
 
