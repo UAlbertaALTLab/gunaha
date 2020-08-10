@@ -20,6 +20,9 @@ class Head(models.Model):
 
     class Meta:
         unique_together = ("text", "word_class")
+        # Orders alphabetically. Note that this may not make sense in the given language
+        # (collating is hard)
+        ordering = ["text"]
 
     def __str__(self) -> str:
         return f"{self.text} ({self.word_class})"
