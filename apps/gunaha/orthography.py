@@ -8,7 +8,28 @@ Deal with orthography
 from unicodedata import normalize
 
 
+def to_search_form(query: str) -> str:
+    """
+    Convert a Tsuut'ina query into a searchable form.
+
+    >>> normalize_orthography("Tłítc'ā")
+    'tlitca'
+    """
+    with_diacritics = normalize("NFKD", normalize_orthography(query.lower()))
+    return (
+        with_diacritics.replace("'", "")
+        .replace("’", "")
+        .replace("\u0142", "l")
+        .replace("\u0300", "")
+        .replace("\u0301", "")
+        .replace("\u0304", "")
+    )
+
+
 def normalize_orthography(tsuutina_word: str) -> str:
+    """
+    Make the orthography of Tsuut'ina words consistent.
+    """
     LATIN_SMALL_LETTER_L_WITH_MIDDLE_TIDLE = "\u026B"
     LATIN_SMALL_LETTER_L_WITH_STROKE = "\u0142"
 
