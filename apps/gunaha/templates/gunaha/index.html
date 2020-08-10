@@ -24,7 +24,7 @@
 
   <article>
     <dl>
-      {% for term in terms %}
+      {% for term in page %}
         <dt>
           <dfn lang="srs">{{ term.text }}</dfn>{% if term.word_class %} ({{ term.word_class }}){% endif %}</dt>
         {% for dfn in term.definitions.all %}
@@ -32,7 +32,23 @@
         {% endfor %}
       {% endfor %}
     </dl>
-    {% endspaceless %}
+
+    <nav class="pagination">
+       {% if page.has_previous %}
+          <a class="pagination__link" href="?page=1">&laquo; First </a>
+          <a class="pagination__link" href="?page={{ page.previous_page_number }}">previous</a>
+        {% endif %}
+
+        <span class="pagination__current">
+            Page {{ page.number }}
+        </span>
+
+        {% if page.has_next %}
+            <a class="pagination__link" href="?page={{ page.next_page_number }}">Next</a>
+            <a class="pagination__link" href="?page={{ page.paginator.num_pages }}"> Last &raquo;</a>
+        {% endif %}
+    </nav>
   </article>
+  {% endspaceless %}
 </body>
 </html>
