@@ -148,6 +148,10 @@ def nfc(text: str) -> str:
 
 
 def should_skip_importing_head(head: str, info: dict) -> bool:
+    if head == "":
+        logger.warn("Skipping entry without dictionary head: %r", info)
+        return True
+
     if head.startswith("*") or head.endswith("*"):
         logger.debug("Skipping ungrammatical form: %r", head)
         return True
