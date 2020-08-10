@@ -1,33 +1,38 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
+  {% spaceless %}
+  {% load static %}
   <meta charset="UTF-8">
   <title>Gúnahà</title>
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@exampledev/new.css@1.1.2/new.min.css">
-  <style>
-    cite { font-variant: all-small-caps }
-  </style>
+  <link rel="stylesheet" href="{% static "gunaha/css/styles.css" %}">
+  {% endspaceless %}
 </head>
 <body>
   {% spaceless %}
   <header>
     <h1>Gúnahà</h1>
-    <p>Tsuut'ina Dictionary</p>
+    <p role="doc-subtitle">Tsuut'ina Dictionary</p>
 
     <form class="search">
       <input type="text" autocorrect="no" class="search__query">
+      <button type="submit" class="search__submit"> Search </button>
     </form>
   </header>
-  <dl>
-    {% for term in terms %}
-      <dt>
-        <dfn lang="srs">{{ term.text }}</dfn>{% if term.word_class %} ({{ term.word_class }}){% endif %}</dt>
-      {% for dfn in term.definitions.all %}
-        <dd>{{ dfn.text }}</dd>
+
+  <article>
+    <dl>
+      {% for term in terms %}
+        <dt>
+          <dfn lang="srs">{{ term.text }}</dfn>{% if term.word_class %} ({{ term.word_class }}){% endif %}</dt>
+        {% for dfn in term.definitions.all %}
+          <dd>{{ dfn.text }}</dd>
+        {% endfor %}
       {% endfor %}
-    {% endfor %}
-  </dl>
-  {% endspaceless %}
+    </dl>
+    {% endspaceless %}
+  </article>
 </body>
 </html>

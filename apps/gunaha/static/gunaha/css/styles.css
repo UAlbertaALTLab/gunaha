@@ -1,0 +1,23 @@
+@charset "UTF-8";
+
+.search {
+  display: flex;
+
+  flex-flow: row nowrap;
+  justify-content: space-between;
+  align-items: baseline;
+
+  font-size: 1.5em;
+}
+
+.search__query, .search__submit {
+  font-size: inherit;
+}
+
+.search__query {
+  flex: 1;
+}
+
+.search__submit {
+  margin-left: 1rem;
+}
