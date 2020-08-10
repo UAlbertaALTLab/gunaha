@@ -28,13 +28,14 @@ from collections import defaultdict
 from hashlib import sha1, sha384
 from pathlib import Path
 from typing import Dict, Set, Tuple
-from unicodedata import normalize
 
 from django.conf import settings
 from django.db import transaction
 from django.db.utils import OperationalError
 
 from apps.morphodict.models import Definition, DictionarySource, Head
+
+from .orthography import nfc, normalize_orthography
 
 logger = logging.getLogger(__name__)
 
@@ -127,24 +128,6 @@ def import_dictionary(purge: bool = False) -> None:
         )
 
     logger.info("Done importing from %s", path_to_tsv)
-
-
-def normalize_orthography(tsuutina_word: str) -> str:
-    LATIN_SMALL_LETTER_L_WITH_MIDDLE_TIDLE = "\u026B"
-    LATIN_SMALL_LETTER_L_WITH_STROKE = "\u0142"
-
-    tsuutina_word = tsuutina_word.strip()
-    tsuutina_word = nfc(tsuutina_word)
-    # According to Chris Cox: Original mostly used <ɫ>, but writers now prefer
-    # <ł>, as it is more distinct from <t>. So let's make it consistent!
-    tsuutina_word = tsuutina_word.replace(
-        LATIN_SMALL_LETTER_L_WITH_MIDDLE_TIDLE, LATIN_SMALL_LETTER_L_WITH_STROKE
-    )
-    return tsuutina_word
-
-
-def nfc(text: str) -> str:
-    return normalize("NFC", text)
 
 
 def should_skip_importing_head(head: str, info: dict) -> bool:
