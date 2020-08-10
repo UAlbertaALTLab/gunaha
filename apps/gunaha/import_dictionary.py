@@ -1,6 +1,25 @@
 #!/usr/bin/env python3
 # -*- coding: UTF-8 -*-
 
+"""
+Imports the Tsuut'ina dictionary content into the DB.
+
+-----------------------------------
+How to import the OneSpot-Sapir CSV
+-----------------------------------
+
+Paraphrased from Dr. Chris Cox:
+
+* If an entry starts with a star, it's an ungrammatical form; leave it out
+* <ɫ> U+026B, LATIN SMALL LETTER L WITH MIDDLE TILDE should be normalized to
+  <ł> U+0142, LATIN SMALL LETTER L WITH STROKE
+* Corollary: orthography normalization should treat the two characters above
+  equivalently!
+* "Not for school edition" are words that... may be NSFW. So tag them as such?
+* The "Folio" column cites where the word came from in the books.
+
+"""
+
 import csv
 import io
 import logging
