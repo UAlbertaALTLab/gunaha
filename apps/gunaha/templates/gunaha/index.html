@@ -11,9 +11,9 @@
 </head>
 <body>
   {% spaceless %}
-  <header>
-    <h1><a href="{% url 'gunaha:index' %}">Gúnahà</a></h1>
-    <p role="doc-subtitle">Tsuut'ina Dictionary</p>
+  <header class="page-header">
+    <h1 class="page-header__title"><a class="title-link" href="{% url 'gunaha:index' %}">Gúnahà</a></h1>
+    <p class="page-header__subtitle" role="doc-subtitle">Tsuut'ina Dictionary</p>
 
     <form class="search" method="GET">
       <input type="text" autocorrect="no" class="search__query" name="q"
@@ -41,18 +41,24 @@
       {% endfor %}
 
       <nav class="pagination">
-       {% if page.has_previous %}
-          <a class="pagination__link" href="?page=1">&laquo; First </a>
-          <a class="pagination__link" href="?page={{ page.previous_page_number }}">previous</a>
+        {% if page.has_previous %}
+          <a class="pagination__link btn" href="?q={{ query }}&page=1">&laquo; First</a>
+          <a class="pagination__link btn" href="?q={{ query }}&page={{ page.previous_page_number }}">Previous</a>
+        {% else %}
+          <span class="pagination__link btn btn--disabled">&laquo; First</span>
+          <span class="pagination__link btn btn--disabled">Previous</span>
         {% endif %}
 
         <span class="pagination__current">
-            Page {{ page.number }}
+          Page {{ page.number }} of {{ paginator.num_pages }}
         </span>
 
         {% if page.has_next %}
-            <a class="pagination__link" href="?page={{ page.next_page_number }}">Next</a>
-            <a class="pagination__link" href="?page={{ page.paginator.num_pages }}"> Last &raquo;</a>
+          <a class="pagination__link btn" href="?q={{ query }}&page={{ page.next_page_number }}">Next</a>
+          <a class="pagination__link btn" href="?q={{ query }}&page={{ page.paginator.num_pages }}"> Last &raquo;</a>
+        {% else %}
+          <span class="pagination__link btn btn--disabled">Next</span>
+          <span class="pagination__link btn btn--disabled">Last &raquo;</span>
         {% endif %}
       </nav>
     {% else %}{# if result #}
