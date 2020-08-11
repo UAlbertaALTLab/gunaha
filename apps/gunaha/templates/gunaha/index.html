@@ -24,12 +24,14 @@
 
   <article>
     <dl>
-      {% for term in page %}
-        <dt>
-          <dfn lang="srs">{{ term.text }}</dfn>{% if term.word_class %} ({{ term.word_class }}){% endif %}</dt>
-        {% for dfn in term.definitions.all %}
-          <dd>{{ dfn.text }}</dd>
-        {% endfor %}
+      {% for result in page %}
+        {% with term=result.object %}
+          <dt>
+            <dfn lang="srs">{{ term.text }}</dfn>{% if term.word_class %} ({{ term.word_class }}){% endif %}</dt>
+          {% for dfn in term.definitions.all %}
+            <dd>{{ dfn.text }}</dd>
+          {% endfor %}
+        {% endwith %}
       {% endfor %}
     </dl>
 
