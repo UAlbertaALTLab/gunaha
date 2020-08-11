@@ -30,4 +30,6 @@ def search_entries(query: Optional[str]):
     if query is None:
         return query_set
 
-    return query_set.filter(content=AutoQuery(query))
+    return query_set.filter(content=AutoQuery(query)) | query_set.filter(
+        head__startswith=to_search_form(query)
+    )

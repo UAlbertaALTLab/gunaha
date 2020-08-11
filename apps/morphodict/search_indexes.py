@@ -14,6 +14,7 @@ class HeadIndex(indexes.SearchIndex, indexes.Indexable):
     # See: ./apps/morphodict/templates/search/indexes/morphodict/head_text.txt
     text = indexes.CharField(document=True, use_template=True)
     definitions = indexes.MultiValueField(indexed=False)
+    head = indexes.CharField(stored=False)
 
     def get_model(self):
         return Head
@@ -26,3 +27,9 @@ class HeadIndex(indexes.SearchIndex, indexes.Indexable):
         Store the raw definition text in the database.
         """
         return [dfn.text for dfn in head.definitions.all()]
+
+    def prepare_head(self, head: Head):
+        # TODO: decouple this
+        from apps.gunaha.orthography import to_search_form
+
+        return to_search_form(head.text)
