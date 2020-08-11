@@ -1,0 +1,3 @@
+{% for dfn in object.definitions.all %}
+{{ dfn.text }}
+{% endfor %}
