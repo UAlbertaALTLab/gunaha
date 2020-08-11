@@ -84,7 +84,7 @@ INSTALLED_APPS = [
     "django.contrib.messages",
     "django.contrib.staticfiles",
     # Third-party
-    "whoosh",
+    "haystack",
     # Local
     "apps.gunaha.apps.GunahaConfig",
     "apps.morphodict.apps.MorphoDictConfig",
