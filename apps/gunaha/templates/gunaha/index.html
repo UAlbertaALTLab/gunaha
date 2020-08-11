@@ -18,13 +18,15 @@
 
     <form class="search" method="GET">
       <input type="text" autocorrect="no" class="search__query" name="q"
-      placeholder="Search in English or Tsúūt'ínà">
+      placeholder="Search in English or Tsúūt'ínà"
+      {% if query %}value="{{ query }}"{% endif %}
+      >
       <button type="submit" class="search__submit"> Search </button>
     </form>
   </header>
 
   <main>
-    {% if page %}
+    {% if query %}
       {% for result in page %}
         <article class="card card--definition">
           <header>
