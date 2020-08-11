@@ -21,5 +21,4 @@ from apps import gunaha
 urlpatterns = [
     path("", include("apps.gunaha.urls")),
     path("admin/", admin.site.urls),
-    path("search/", include("haystack.urls")),
 ]
