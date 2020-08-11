@@ -83,6 +83,9 @@ INSTALLED_APPS = [
     "django.contrib.sessions",
     "django.contrib.messages",
     "django.contrib.staticfiles",
+    # Third-party
+    "whoosh",
+    # Local
     "apps.gunaha.apps.GunahaConfig",
     "apps.morphodict.apps.MorphoDictConfig",
 ]
@@ -122,6 +125,15 @@ WSGI_APPLICATION = "gunahasite.wsgi.application"
 # https://docs.djangoproject.com/en/2.2/ref/settings/#databases
 
 DATABASES = {"default": {"ENGINE": DATABASE_ENGINE, "NAME": DATABASE_NAME,}}
+
+############################ Full-text search with Haystack ############################
+
+HAYSTACK_CONNECTIONS = {
+    "default": {
+        "ENGINE": "haystack.backends.whoosh_backend.WhooshEngine",
+        "PATH": os.fspath(DATA_DIR / "whoosh_index"),
+    },
+}
 
 
 # Password validation

@@ -134,6 +134,17 @@ sqlparse = ">=0.2.0"
 
 [[package]]
 category = "main"
+description = "Pluggable search for Django."
+name = "django-haystack"
+optional = false
+python-versions = "*"
+version = "2.8.1"
+
+[package.dependencies]
+Django = ">=1.11"
+
+[[package]]
+category = "main"
 description = "Javascript url handling for Django that doesn't hurt."
 name = "django-js-reverse"
 optional = false
@@ -460,6 +471,7 @@ version = "2.1.0"
 reference = ""
 type = "url"
 url = "https://eddieantonio.keybase.pub/sortedcontainers-2.1.0.tar.gz"
+
 [[package]]
 category = "main"
 description = "Non-validating SQL parser"
@@ -524,8 +536,16 @@ optional = false
 python-versions = "*"
 version = "0.2.5"
 
+[[package]]
+category = "main"
+description = "Fast, pure-Python full text indexing, search, and spell checking library."
+name = "whoosh"
+optional = false
+python-versions = "*"
+version = "2.7.4"
+
 [metadata]
-content-hash = "f376ba7bc73ed55f9a6ed84f2794b0ec06c5d62c1124f2e23fe0c604fac28ce3"
+content-hash = "2a4c642727bdc7123baff4a7cfcf5475e31ef0a0fb71833bc7266d9fa250271a"
 python-versions = "^3.8"
 
 [metadata.files]
@@ -609,6 +629,9 @@ django = [
 django-debug-toolbar = [
     {file = "django-debug-toolbar-2.2.tar.gz", hash = "sha256:eabbefe89881bbe4ca7c980ff102e3c35c8e8ad6eb725041f538988f2f39a943"},
     {file = "django_debug_toolbar-2.2-py3-none-any.whl", hash = "sha256:ff94725e7aae74b133d0599b9bf89bd4eb8f5d2c964106e61d11750228c8774c"},
+]
+django-haystack = [
+    {file = "django-haystack-2.8.1.tar.gz", hash = "sha256:8b54bcc926596765d0a3383d693bcdd76109c7abb6b2323b3984a39e3576028c"},
 ]
 django-js-reverse = [
     {file = "django-js-reverse-0.9.1.tar.gz", hash = "sha256:2a392d169f44e30b883c30dfcfd917a14167ce8fe196c99d2385b31c90d77aa0"},
@@ -795,4 +818,9 @@ urllib3 = [
 wcwidth = [
     {file = "wcwidth-0.2.5-py2.py3-none-any.whl", hash = "sha256:beb4802a9cebb9144e99086eff703a642a13d6a0052920003a230f3294bbe784"},
     {file = "wcwidth-0.2.5.tar.gz", hash = "sha256:c4d647b99872929fdb7bdcaa4fbe7f01413ed3d98077df798530e5b04f116c83"},
+]
+whoosh = [
+    {file = "Whoosh-2.7.4-py2.py3-none-any.whl", hash = "sha256:aa39c3c3426e3fd107dcb4bde64ca1e276a65a889d9085a6e4b54ba82420a852"},
+    {file = "Whoosh-2.7.4.tar.gz", hash = "sha256:7ca5633dbfa9e0e0fa400d3151a8a0c4bec53bd2ecedc0a67705b17565c31a83"},
+    {file = "Whoosh-2.7.4.zip", hash = "sha256:e0857375f63e9041e03fedd5b7541f97cf78917ac1b6b06c1fcc9b45375dda69"},
 ]
