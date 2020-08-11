@@ -540,12 +540,10 @@ img {
   align-items: baseline;
 }
 
-
 .pagination__link {
   flex-basis: 10%;
 }
 
 .pagination__current {
-  flex-basis: 20%;
   text-align: center;
 }
