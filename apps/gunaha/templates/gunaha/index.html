@@ -23,19 +23,23 @@
     </form>
   </header>
 
-  <article>
-    <dl>
+  <main>
+    {% if page %}
       {% for result in page %}
-        <dt>
-          <dfn lang="srs">{{ result.object.text }}</dfn>
-        </dt>
-        {% for dfn in result.definitions %}
-          <dd>{{ dfn }}</dd>
-        {% endfor %}
-      {% endfor %}
-    </dl>
+        <article class="card card--definition">
+          <header>
+            <h2><dfn lang="srs">{{ result.object.text }}</dfn></h2>
+          </header>
 
-    <nav class="pagination">
+          <ol>
+          {% for dfn in result.definitions %}
+            <li>{{ dfn }}
+          {% endfor %}
+          </ol>
+        </article>
+      {% endfor %}
+
+      <nav class="pagination">
        {% if page.has_previous %}
           <a class="pagination__link" href="?page=1">&laquo; First </a>
           <a class="pagination__link" href="?page={{ page.previous_page_number }}">previous</a>
@@ -49,8 +53,14 @@
             <a class="pagination__link" href="?page={{ page.next_page_number }}">Next</a>
             <a class="pagination__link" href="?page={{ page.paginator.num_pages }}"> Last &raquo;</a>
         {% endif %}
-    </nav>
-  </article>
+      </nav>
+    {% else %}{# if result #}
+      <article class="card card--intro">
+        <h2> Welcome to Gúnahà! </h2>
+        <p> This is an online <strong>Tsúūt'ínà</strong> dictionary. </p>
+      </article>
+    {% endif %}{# /if result #}
+  </main>
   {% endspaceless %}
 </body>
 </html>
