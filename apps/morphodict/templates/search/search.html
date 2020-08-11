@@ -14,13 +14,16 @@
   {% if query %}
   <h3>Results</h3>
 
+  <dl>
   {% for result in page.object_list %}
-  <p>
-  <a href="{{ result.object.get_absolute_url }}">{{ result.object.text }}</a>
-  </p>
+    <dt>{{ result.object.text }}
+    {% for dfn in result.object.definitions.all %}
+      <dd>{{ dfn.text }} </dd>
+    {% endfor %}
   {% empty %}
-  <p>No results found.</p>
+    <dd>No results found.</dd>
   {% endfor %}
+  </dl>
 
   {% if page.has_previous or page.has_next %}
   <div>
