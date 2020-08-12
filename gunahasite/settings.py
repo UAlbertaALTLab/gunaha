@@ -21,7 +21,7 @@ from environs import Env
 env = Env()
 env.read_env()
 
-# Buile paths inside the project like this: BASE_PATH / 'path' / 'to' / 'file'
+# Build paths inside the project like this: BASE_PATH / 'path' / 'to' / 'file'
 BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 BASE_PATH = Path(BASE_DIR).resolve()
 
@@ -59,6 +59,17 @@ with env.prefixed("DATABASE_"):
     DATABASE_NAME = env("NAME", os.fspath(DATA_DIR / "db.sqlite3"))
     DATABASE_LOG_LEVEL = env.log_level("LOG_LEVEL", "WARN")
 
+############################# ENV: STATIC FILES ##############################
+
+# Static files (CSS, JavaScript, Images)
+# https://docs.djangoproject.com/en/2.2/howto/static-files/
+with env.prefixed("STATIC_"):
+    # Where collectstatic will dump files:
+    STATIC_ROOT = env("ROOT", None)
+    # The URL prefix for all static files. MUST end with a slash!
+    STATIC_URL = env("URL", "/static/")
+
+
 ################################# VALIDATION #################################
 
 if SECRET_KEY is INVALID_SECRET_KEY:
@@ -71,8 +82,8 @@ if SECRET_KEY is INVALID_SECRET_KEY:
     SECRET_KEY = "<invalid>"
     ALLOWED_HOSTS = ["localhost", "127.0.0.1"]
 
-##################### REQUIRED SETTINGS FOR APPLICATIONS #####################
 
+##################### REQUIRED SETTINGS FOR APPLICATIONS #####################
 
 # Applications required for this site:
 
@@ -164,12 +175,6 @@ USE_I18N = True
 USE_L10N = True
 
 USE_TZ = True
-
-
-# Static files (CSS, JavaScript, Images)
-# https://docs.djangoproject.com/en/2.2/howto/static-files/
-
-STATIC_URL = "/static/"
 
 ################################## Logging ###################################
 
