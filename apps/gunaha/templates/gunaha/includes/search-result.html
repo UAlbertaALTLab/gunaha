@@ -1,0 +1,23 @@
+{% spaceless %}
+{% comment %}
+
+  Displays a single search result (haystack SearchResult object)
+
+  Parameters:
+   - result: haystack SearchResult with attributes:
+      .object: a Head object
+      .definitions: a list of cached definition text
+
+{% endcomment %}
+<article class="card card--definition">
+  <header>
+    <h2><dfn lang="srs">{{ result.object.text }}</dfn></h2>
+  </header>
+
+  <ol>
+  {% for dfn in result.definitions %}
+    <li>{{ dfn }}
+  {% endfor %}
+  </ol>
+</article>
+{% endspaceless %}

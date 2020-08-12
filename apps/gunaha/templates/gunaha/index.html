@@ -27,23 +27,12 @@
   <main>
     {% if query %}
       {% for result in page %}
-        <article class="card card--definition">
-          <header>
-            <h2><dfn lang="srs">{{ result.object.text }}</dfn></h2>
-          </header>
-
-          <ol>
-          {% for dfn in result.definitions %}
-            <li>{{ dfn }}
-          {% endfor %}
-          </ol>
-        </article>
+        {% include "./includes/search-result.html" %}
       {% endfor %}
-
       {% include "./includes/pagination-controls.html" %}
-    {% else %}{# if result #}
+    {% else %}
       {% include "./includes/intro.html" %}
-    {% endif %}{# /if result #}
+    {% endif %}
   </main>
   {% endspaceless %}
 </body>
