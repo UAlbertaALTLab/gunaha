@@ -4,7 +4,7 @@
   {% spaceless %}
   {% load static %}
   <meta charset="UTF-8">
-  <title>Gúnahà</title>
+  <title>{% if query %}🔍 {{ query }} | {% endif %}Gúnahà — Tsuut'ina dictionary</title>
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <link rel="stylesheet" href="{% static "gunaha/css/styles.css" %}">
   {% endspaceless %}
@@ -18,8 +18,7 @@
     <form class="search" method="GET">
       <input type="text" autocorrect="no" class="search__query" name="q"
       placeholder="Search in English or Tsúūt'ínà"
-      {% if query %}value="{{ query }}"{% endif %}
-      >
+      {% if query %}value="{{ query }}"{% endif %}>
       <button type="submit" class="search__submit"> Search </button>
     </form>
   </header>
