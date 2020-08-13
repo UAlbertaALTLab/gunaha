@@ -8,6 +8,7 @@ Enables search using Haystack for models.
 from haystack import indexes  # type: ignore
 
 from .models import Definition, Head
+from .search import to_search_form
 
 
 class HeadIndex(indexes.SearchIndex, indexes.Indexable):
@@ -29,7 +30,7 @@ class HeadIndex(indexes.SearchIndex, indexes.Indexable):
         return [dfn.text for dfn in head.definitions.all()]
 
     def prepare_head(self, head: Head):
-        # TODO: decouple this
-        from apps.gunaha.orthography import to_search_form
-
+        """
+        Convert to search form.
+        """
         return to_search_form(head.text)
