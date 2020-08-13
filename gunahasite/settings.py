@@ -203,3 +203,8 @@ logging.config.dictConfig(
         },
     }
 )
+
+
+################################# MORPHODICT #################################
+
+MORPHODICT_TOKEN_TO_SEARCH_FORM = "apps.gunaha.orthography.to_search_form"
