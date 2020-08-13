@@ -1,10 +1,12 @@
 #!/usr/bin/env python3
 # -*- coding: UTF-8 -*-
 
+from functools import lru_cache
 from importlib import import_module
 from typing import Callable
 
 
+@lru_cache
 def get_function(path: str) -> Callable:
     """
     Gets a function from a given path.
