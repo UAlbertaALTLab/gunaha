@@ -514,10 +514,18 @@ img {
 
 .search__query {
   flex: 1;
+  min-width: 10%; /* Firefox makes this very small for some reason! */
+
+  border-top-right-radius: 0;
+  border-bottom-right-radius: 0;
+  border-right-width: 0;
 }
 
 .search__submit {
-  margin-left: 0.5rem;
+  border: 1px solid var(--nc-bg-3);
+
+  border-top-left-radius: 0;
+  border-bottom-left-radius: 0;
 }
 
 /**
