@@ -12,12 +12,15 @@ def to_search_form(query: str) -> str:
     """
     Convert a Tsuut'ina query into a searchable form.
 
-    >>> normalize_orthography("Tłítc'ā")
+    >>> to_search_form("Tłítc'ā")
     'tlitca'
+    >>> to_search_form("Gúnā-hà")
+    'gunaha'
     """
     with_diacritics = normalize("NFKD", normalize_orthography(query.lower()))
     return (
         with_diacritics.replace("'", "")
+        .replace("-", "")
         .replace("’", "")
         .replace("\u0142", "l")
         .replace("\u0300", "")
