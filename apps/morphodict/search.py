@@ -6,7 +6,7 @@ Search utilties.
 """
 
 from importlib import import_module
-from typing import Optional
+from typing import Callable, Optional
 
 from django.conf import settings
 from haystack.query import EmptySearchQuerySet, SearchQuerySet  # type: ignore
@@ -31,11 +31,18 @@ def search_entries(query: Optional[str]):
 
 
 def to_search_form(query: str) -> str:
-    *module_path, callable_name = settings.MORPHODICT_TOKEN_TO_SEARCH_FORM.split(".")
-    mod = import_module(".".join(module_path))
-    fn = getattr(mod, callable_name)
-    assert callable(fn), f"{settings.MORPHODICT_TOKEN_TO_SEARCH_FORM} is not callable"
-    term = fn(query)
+    term = _get_function(settings.MORPHODICT_TOKEN_TO_SEARCH_FORM)(query)
     if not isinstance(term, str):
         raise TypeError(f"returns non-string")
     return term
+
+
+def _get_function(path: str) -> Callable:
+    *module_path, callable_name = path.split(".")
+    module = import_module(".".join(module_path))
+    fn = getattr(module, callable_name)
+
+    if not callable(fn):
+        raise ValueError(f"{settings.MORPHODICT_TOKEN_TO_SEARCH_FORM} is not callable")
+
+    return fn
