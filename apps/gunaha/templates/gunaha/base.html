@@ -1,0 +1,32 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  {% spaceless %}
+  {% load static %}
+  <meta charset="UTF-8">
+  <title>{% if query %}🔍 {{ query }} | {% endif %}{{ sitename }} — {{ langname }} dictionary</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <link rel="stylesheet" href="{% static "gunaha/css/styles.css" %}">
+  {% endspaceless %}
+</head>
+<body>
+  {% spaceless %}
+  <header class="page-header">
+    <h1 class="page-header__title"><a class="title-link" href="{% url 'gunaha:index' %}">{{ sitename }}</a></h1>
+    <p class="page-header__subtitle" role="doc-subtitle">{{ langname }} Dictionary</p>
+
+    <form class="search" method="GET">
+      <input type="text" autocorrect="no" class="search__query" name="q"
+      placeholder="Search in English or Tsúūt'ínà"
+      {% if query %}value="{{ query }}"{% endif %}>
+      <button type="submit" class="search__submit"> Search </button>
+    </form>
+  </header>
+
+  <main>
+    {% block content %}
+    {% endblock %}
+  </main>
+  {% endspaceless %}
+</body>
+</html>
