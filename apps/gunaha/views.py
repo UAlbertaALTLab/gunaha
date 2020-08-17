@@ -1,4 +1,8 @@
+from functools import lru_cache as call_and_cache
+from pathlib import Path
+
 from django.core.paginator import Paginator
+from django.http import Http404
 from django.shortcuts import render
 
 from apps.morphodict.search import search_entries
@@ -20,6 +24,21 @@ def index(request):
 
 
 def generic_page(request, page_name):
-    # TODO: assert the page exists!
-    # TODO: 404 ortherwise
+    """
+    A page in templates/gunana/pages/*.html will be served by this template:
+    """
+    if page_name not in find_available_pages():
+        # This is not a page we can serve.
+        raise Http404
+
     return render(request, f"gunaha/pages/{page_name}.html")
+
+
+@call_and_cache
+def find_available_pages():
+    """
+    Searches for available HTML templates in Gunaha's template dir.
+    """
+    pages_directory = Path(__file__).parent / "templates" / "gunaha" / "pages"
+    assert pages_directory.is_dir(), pages_directory
+    return {name.stem for name in pages_directory.glob("*.html")}
