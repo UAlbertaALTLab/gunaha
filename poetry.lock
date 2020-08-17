@@ -50,7 +50,7 @@ typed-ast = ">=1.4.0"
 d = ["aiohttp (>=3.3.2)", "aiohttp-cors"]
 
 [[package]]
-category = "dev"
+category = "main"
 description = "Python package for providing Mozilla's CA Bundle."
 name = "certifi"
 optional = false
@@ -58,7 +58,7 @@ python-versions = "*"
 version = "2020.6.20"
 
 [[package]]
-category = "dev"
+category = "main"
 description = "Universal encoding detector for Python 2 and 3"
 name = "chardet"
 optional = false
@@ -205,7 +205,7 @@ version = "1.2.4"
 colorama = ">=0.4,<1.0"
 
 [[package]]
-category = "dev"
+category = "main"
 description = "Internationalized Domain Names in Applications (IDNA)"
 name = "idna"
 optional = false
@@ -434,7 +434,7 @@ python-versions = "*"
 version = "2020.7.14"
 
 [[package]]
-category = "dev"
+category = "main"
 description = "Python HTTP for Humans."
 name = "requests"
 optional = false
@@ -516,7 +516,7 @@ python-versions = "*"
 version = "3.7.4.2"
 
 [[package]]
-category = "dev"
+category = "main"
 description = "HTTP library with thread-safe connection pooling, file post, and more."
 name = "urllib3"
 optional = false
@@ -545,7 +545,7 @@ python-versions = "*"
 version = "2.7.4"
 
 [metadata]
-content-hash = "2a4c642727bdc7123baff4a7cfcf5475e31ef0a0fb71833bc7266d9fa250271a"
+content-hash = "d309d2ae2f1fa3288026b1c8c3461d0b30cdf5115e0a0b7413713dfceb6443e5"
 python-versions = "^3.8"
 
 [metadata.files]

@@ -52,6 +52,10 @@ ALLOWED_HOSTS: List[str] = env.list("ALLOWED_HOSTS", ["localhost"])
 # Where persistent data will be placed
 DATA_DIR = env.path("DATA_DIR", os.fspath(BASE_PATH / "run"))
 
+# The Google Sheets ID of the vocabulary list.
+# Obtain this ID
+ONESPOT_GOOGLE_SHEETS_ID = env("ONESPOT_GOOGLE_SHEETS_ID", None)
+
 ############################### ENV: DATABASES ###############################
 
 with env.prefixed("DATABASE_"):

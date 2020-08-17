@@ -15,6 +15,7 @@ marisa-trie = "^0.7.5"
 environs = "^8.0.0"
 django-haystack = "^2.8.1"
 whoosh = "^2.7.4"
+requests = "^2.24.0"
 
 [tool.poetry.dev-dependencies]
 black = "^19.10b0"
