@@ -9,7 +9,7 @@
   <link rel="stylesheet" href="{% static "gunaha/css/styles.css" %}">
   {% endspaceless %}
 </head>
-<body>
+<body class="site">
   {% spaceless %}
   <header class="page-header">
     <h1 class="page-header__title"><a class="title-link" href="{% url 'gunaha:index' %}">{{ sitename }}</a></h1>
@@ -23,7 +23,7 @@
     </form>
   </header>
 
-  <main>
+  <main class="site__content">
     {% block content %}
     {% endblock %}
   </main>

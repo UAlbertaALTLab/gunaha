@@ -465,6 +465,18 @@ img {
 
 /************************** Start of custom styles **************************/
 
+.site {
+  display: flex;
+  flex-flow: column nowrap;
+
+  box-sizing: border-box;
+  min-height: 100vh;
+}
+
+.site__content {
+  flex: 1;
+}
+
 .page-header {
   background: var(--nc-bg-1);
   border-bottom: 1px solid var(--nc-bg-3);
