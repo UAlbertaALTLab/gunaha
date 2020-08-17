@@ -124,6 +124,7 @@ TEMPLATES = [
                 "django.template.context_processors.request",
                 "django.contrib.auth.context_processors.auth",
                 "django.contrib.messages.context_processors.messages",
+                "apps.morphodict.context_processors.site_info",
             ],
         },
     },
@@ -207,4 +208,6 @@ logging.config.dictConfig(
 
 ################################# MORPHODICT #################################
 
+MORPHODICT_SITE_NAME = "Gūnáhà"
+MORPHODICT_LANGUAGE_NAME = "Tsúūt’ínà"
 MORPHODICT_TOKEN_TO_SEARCH_FORM = "apps.gunaha.orthography.to_search_form"
