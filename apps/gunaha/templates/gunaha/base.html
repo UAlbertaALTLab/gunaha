@@ -4,7 +4,7 @@
   {% spaceless %}
   {% load static %}
   <meta charset="UTF-8">
-  <title>{% if query %}🔍 {{ query }} | {% endif %}{{ sitename }} — {{ langname }} dictionary</title>
+  <title>{%block pagetitle %}{% if query %}🔍 {{ query }} | {% endif %}{{ sitename }} — {{ langname }} dictionary{% endblock %}</title>
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <link rel="stylesheet" href="{% static "gunaha/css/styles.css" %}">
   {% endspaceless %}
