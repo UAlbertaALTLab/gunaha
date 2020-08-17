@@ -557,3 +557,18 @@ img {
 .pagination__current {
   text-align: center;
 }
+
+/**
+ * Footer and nav.
+ */
+
+.nav-list {
+  list-style: none;
+  padding: 0;
+}
+
+.nav-list__link {
+  display: inline;
+
+  margin-inline-start: 0.5em;
+}

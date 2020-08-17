@@ -27,6 +27,15 @@
     {% block content %}
     {% endblock %}
   </main>
+
+  <footer class="page-footer">
+    <nav class="page-footer__links">
+      <ul class="nav-list">
+        <li class="nav-list__link"><a href="{% url "gunaha:index" %}">Home</a>
+        <li class="nav-list__link"><a href="{% url "gunaha:page" "about" %}">About</a>
+      </ul>
+    </nav>
+  </footer>
   {% endspaceless %}
 </body>
 </html>
