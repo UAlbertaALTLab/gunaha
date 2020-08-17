@@ -8,4 +8,5 @@ from . import views
 app_name = "gunaha"
 urlpatterns = [
     path("", views.index, name="index"),
+    path("<str:page_name>", views.generic_page, name="page"),
 ]

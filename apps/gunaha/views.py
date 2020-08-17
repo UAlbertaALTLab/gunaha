@@ -17,3 +17,9 @@ def index(request):
         "gunaha/index.html",
         context={"page": page, "query": query, "paginator": pages},
     )
+
+
+def generic_page(request, page_name):
+    # TODO: assert the page exists!
+    # TODO: 404 ortherwise
+    return render(request, f"gunaha/pages/{page_name}.html")
