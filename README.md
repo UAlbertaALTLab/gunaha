@@ -1,6 +1,6 @@
 # Gūnáhà
 
-Intelligent On-line Tsuut'ina Dictionary
+On-line Tsuut'ina Dictionary
 
 ## Setup
 
@@ -19,7 +19,7 @@ This will generate the `.env` file for the first time:
 
 ## Deployment on `altlab-itw`
 
-As of 2020-08-13 this app is very JANKILY deployed on `altlab-itw`. Let
+As of 2020-08-18 this app is very JANKILY deployed on `altlab-itw`. Let
 me walk you through it (my dignity will not survive this):
 
  1. On pushes to the default branch, [a GitHub action][action] builds
@@ -43,10 +43,10 @@ me walk you through it (my dignity will not survive this):
  7. I then start up a shell inside the new
     container using a script located in `/root`:
 
-        ./start-gunaha-docker-container
+        ./open-gunaha-docker-container
 
  8. Within the container, I run whatever management commands I need to
-    run at the given deploy. This maybe zero or all of the following
+    run at the given deploy. This may be zero or all of the following
     commands, depending on the code change. These include:
 
      1. migrate the database schema
@@ -77,3 +77,14 @@ tried it.
 
 [action]: https://github.com/UAlbertaALTLab/gunaha/blob/master/.github/workflows/test-and-publish.yml
 [gunaha:latest]: https://github.com/UAlbertaALTLab/gunaha/packages/246109
+
+## Network setup
+
+The Docker container assumes the following setup:
+
+altlab-gw
+: nginx: reverse proxy <https://gunaha.altlab.dev> → http://altlab-itw:8000 (terminate SSL)
+: nginx: host static files at <https://static.altlab.app/gunaha> from `altlab-gw//export/data/static.altlab.app/gunaha`
+: nfs: export `/export/data`
+altlab-itw:
+: mounted `altlab-gw//export/data` as `/data/`
