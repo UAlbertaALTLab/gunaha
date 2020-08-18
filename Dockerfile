@@ -1,8 +1,12 @@
 FROM python:3.8-slim-buster
 
-ARG WSGI_USER=uwsgi
-RUN groupadd -r ${WSGI_USER} \
-        && useradd --no-log-init -r -g ${WSGI_USER} ${WSGI_USER}
+ARG WSGI_USER=gunaha
+# Choose an ID that will be consistent across all machines in the network
+# To avoid overlap with user IDs, use an ID over
+# /etc/login.defs:/UID_MAX/, which defaults to 60,000
+ARG UID_GID=60001
+RUN groupadd --system --gid ${UID_GID} ${WSGI_USER}   \
+        && useradd --no-log-init --system --gid ${WSGI_USER} --uid ${UID_GID} ${WSGI_USER}
 
 
 # Setup Python deps
