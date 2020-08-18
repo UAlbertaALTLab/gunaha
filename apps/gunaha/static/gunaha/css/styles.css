@@ -44,6 +44,9 @@
   --nc-lk-tx: #FFFFFF;
   --nc-ac-1: #79FFE1;
   --nc-ac-tx: #0C4047;
+  /* Errors */
+  --nc-err-tx: #600;
+  --nc-err-bg: #FDD;
 
   /* Dark theme */
   --nc-d-tx-1: #ffffff;
@@ -57,6 +60,9 @@
   --nc-d-lk-tx: #FFFFFF;
   --nc-d-ac-1: #2D16AC;
   --nc-d-ac-tx: #FFFFFF;
+  /* Errors */
+  --nc-d-err-tx: #fcc;
+  --nc-d-err-bg: #300;
 }
 
 @media (prefers-color-scheme: dark) {
@@ -72,6 +78,8 @@
     --nc-lk-tx: var(--nc--dlk-tx);
     --nc-ac-1: var(--nc-d-ac-1);
     --nc-ac-tx: var(--nc--dac-tx);
+    --nc-err-tx: var(--nc-d-err-tx);
+    --nc-err-bg: var(--nc-d-err-bg);
   }
 }
 
@@ -555,6 +563,15 @@ img {
   border-radius: 4px;
 }
 
+.card--error {
+  color: var(--nc-err-tx);
+  background-color: var(--nc-err-bg);
+}
+
+.card__heading {
+  color: inherit;
+}
+
 .pagination {
   display: flex;
   flex-flow: row nowrap;
@@ -583,4 +600,8 @@ img {
   display: inline;
 
   margin-inline-start: 0.5em;
+}
+
+.query {
+  font-weight: bold;
 }

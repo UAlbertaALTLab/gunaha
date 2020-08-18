@@ -9,8 +9,8 @@
       {% include "./includes/pagination-controls.html" %}
     {% else %}
       <article class="card card--error">
-        <h2>No results</h2>
-        <p class="explanation"> No results for “{{ query }}”. </p>
+        <h2 class="card__heading">No results</h2>
+        <p class="card__explanation"> No results for “<output class="query">{{ query }}</output>”. </p>
       </article>
     {% endif %}
   {% else %}
