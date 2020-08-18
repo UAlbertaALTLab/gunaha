@@ -1,4 +1,4 @@
-# Gúnahà
+# Gūnáhà
 
 Intelligent On-line Tsuut'ina Dictionary
 
