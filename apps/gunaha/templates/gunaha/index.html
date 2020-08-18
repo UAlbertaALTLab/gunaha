@@ -2,10 +2,17 @@
 
 {% block content %}
   {% if query %}
-    {% for result in page %}
-      {% include "./includes/search-result.html" %}
-    {% endfor %}
-    {% include "./includes/pagination-controls.html" %}
+    {% if results %}
+      {% for result in page %}
+        {% include "./includes/search-result.html" %}
+      {% endfor %}
+      {% include "./includes/pagination-controls.html" %}
+    {% else %}
+      <article class="card card--error">
+        <h2>No results</h2>
+        <p class="explanation"> No results for “{{ query }}”. </p>
+      </article>
+    {% endif %}
   {% else %}
     {% include "./includes/intro.html" %}
   {% endif %}

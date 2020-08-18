@@ -19,7 +19,7 @@ def index(request):
     return render(
         request,
         "gunaha/index.html",
-        context={"page": page, "query": query, "paginator": pages},
+        context={"page": page, "query": query, "paginator": pages, "results": results},
     )
 
 
