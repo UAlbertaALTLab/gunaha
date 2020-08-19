@@ -34,12 +34,7 @@ class HeadManager(models.Manager):
         if query is None:
             query_set = EmptySearchQuerySet()
         else:
-            # We cannot import Head directly —or even reference it by name!— or else
-            # mypy v0.770 gets VERY upset (import cycle?);
-            # instead, do this ugly kludge:
-            Head_ = apps.get_app_config("morphodict").get_model("Head")
-            query_set = SearchQuerySet().models(Head_)
-            # query_set = SearchQuerySet()
+            query_set = SearchQuerySet().models(self.get_model())
 
         if not languages:
             languages = DEFAULT_LANGUAGES
@@ -62,3 +57,11 @@ class HeadManager(models.Manager):
         self, text: str, query_set: SearchQuerySet
     ) -> SearchQuerySet:
         return query_set.auto_query(text)
+
+    def get_model(self):
+        """
+        We cannot import the Head model directly (or even reference it by name!) or else
+        mypy v0.770 gets VERY upset (possible import cycle?); instead, do this to return
+        the model class:
+        """
+        return apps.get_app_config("morphodict").get_model("Head")
