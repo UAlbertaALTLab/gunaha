@@ -41,6 +41,20 @@ def test_query_not_found(search_by_query):
     assert "No results for" in res.content.decode("UTF-8")
 
 
+def test_search_in_tsuutina_only(search_by_query):
+    query = "dog"
+    tsuutina = "dóghà"
+    correct_definition = "whiskers"
+    incorrect_definition = "dog"
+
+    res = search_by_query(query, lang="srs")
+    page = res.content.decode("UTF-8")
+
+    assertInHTML(f'<dfn lang="srs"> {escape_html(tsuutina)}', page)
+    assertInHTML(f"<li> {escape_html(correct_definition)}", page)
+    assertInHTML(f"<li> {escape_html(incorrect_definition)}", page, count=0)
+
+
 @pytest.fixture
 def search_by_query(client):
     """
