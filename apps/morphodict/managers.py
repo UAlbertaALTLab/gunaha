@@ -10,7 +10,7 @@ from typing import Optional
 from django.db import models
 from haystack.query import EmptySearchQuerySet, SearchQuerySet  # type: ignore
 
-from .search import to_search_form
+from .util import to_search_form
 
 
 class HeadManager(models.Manager):
