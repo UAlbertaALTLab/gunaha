@@ -12,17 +12,10 @@ from django.db import models
 from haystack.query import EmptySearchQuerySet, SearchQuerySet  # type: ignore
 
 from .apps import MorphoDictConfig
+from .errors import InvalidLanguageError
 from .util import to_search_form
 
 DEFAULT_LANGUAGES = frozenset(("srs", "eng",))  # Tsuut'ina  # English
-
-
-class MorphoDictError(Exception):
-    ...
-
-
-class InvalidLanguageSelectionError(MorphoDictError):
-    ...
 
 
 class HeadManager(models.Manager):
@@ -43,7 +36,7 @@ class HeadManager(models.Manager):
             languages = DEFAULT_LANGUAGES
         elif len(DEFAULT_LANGUAGES.intersection(languages)) == 0:
             # Cannot search for invalid languages
-            raise InvalidLanguageSelectionError(languages)
+            raise InvalidLanguageError(languages)
 
         if query is None:
             query_set = EmptySearchQuerySet()
