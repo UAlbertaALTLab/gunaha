@@ -8,16 +8,28 @@ Try some searches
 from urllib.parse import urlencode
 
 import pytest
+from django.utils.html import escape as escape_html
+from pytest_django.asserts import assertInHTML  # type: ignore
 
 
 @pytest.mark.django_db
-def test_search(search_by_query):
+@pytest.mark.parametrize(
+    "query,tsuutina,english",
+    [
+        ("tlicha", "tłích'ā", "dog"),
+        ("dog", "dóghà", "whiskers"),
+        ("sigunaha", "sīgūnáhà", "my word"),
+    ],
+)
+def test_search(query, tsuutina, english, search_by_query):
     """
     Test an ordinary search.
     """
-    query = "tlicha"
     res = search_by_query(query)
-    assert "dog" in res.content.decode("UTF-8")
+    page = res.content.decode("UTF-8")
+    assertInHTML(f"<li> {escape_html(english)}", page)
+    print(page)
+    assertInHTML(f'<dfn lang="srs">{escape_html(tsuutina)}', page)
 
 
 @pytest.mark.django_db
