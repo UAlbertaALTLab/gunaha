@@ -19,6 +19,7 @@ class HeadManager(models.Manager):
 
 
         Head.objects.search(query) -> SearchQuerySet
+
     """
 
     def search(self, query: Optional[str]) -> SearchQuerySet:
@@ -34,6 +35,18 @@ class HeadManager(models.Manager):
             query_set = SearchQuerySet().models(Head)
 
         text = query or ""
-        return query_set.auto_query(text) | query_set.filter(
-            head_simplified__startswith=to_search_form(text)
-        )
+        result_set = query_set
+        result_set |= self._search_in_definition_language(text, query_set)
+        result_set |= self._search_in_dictionary_language(text, query_set)
+
+        return result_set
+
+    def _search_in_dictionary_language(
+        self, text: str, query_set: SearchQuerySet
+    ) -> SearchQuerySet:
+        return query_set.filter(head_simplified__startswith=to_search_form(text))
+
+    def _search_in_definition_language(
+        self, text: str, query_set: SearchQuerySet
+    ) -> SearchQuerySet:
+        return query_set.auto_query(text)
