@@ -12,7 +12,8 @@ MAX_RESULTS_PER_PAGE = 30
 
 def index(request):
     query = request.GET.get("q", None)
-    results = Head.objects.search(query)
+    langs = request.GET.get("lang", {"srs", "eng"})
+    results = Head.objects.search(query, languages=langs)
     pages = Paginator(results, MAX_RESULTS_PER_PAGE)
     # page page get page page get get get page get
     page = pages.get_page(request.GET.get("page", 1))

@@ -22,7 +22,9 @@ class HeadManager(models.Manager):
 
     """
 
-    def search(self, query: Optional[str]) -> SearchQuerySet:
+    def search(
+        self, query: Optional[str], languages=frozenset(("srs", "eng"))
+    ) -> SearchQuerySet:
         """
         Does a full text search based on the dictionary head.
         """
@@ -36,8 +38,10 @@ class HeadManager(models.Manager):
 
         text = query or ""
         result_set = query_set
-        result_set |= self._search_in_definition_language(text, query_set)
-        result_set |= self._search_in_dictionary_language(text, query_set)
+        if "eng" in languages:
+            result_set |= self._search_in_definition_language(text, query_set)
+        if "srs" in languages:
+            result_set |= self._search_in_dictionary_language(text, query_set)
 
         return result_set
 
