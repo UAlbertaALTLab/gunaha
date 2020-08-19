@@ -15,7 +15,9 @@ class HeadIndex(indexes.SearchIndex, indexes.Indexable):
     # See: ./apps/morphodict/templates/search/indexes/morphodict/head_text.txt
     text = indexes.CharField(document=True, use_template=True)
     definitions = indexes.MultiValueField(indexed=False)
-    head = indexes.CharField(stored=False)
+    head = indexes.CharField(model_attr="text")
+    # same as "head", but with to_search_form() applied
+    head_simplified = indexes.CharField(stored=False)
 
     def get_model(self):
         return Head
@@ -29,7 +31,7 @@ class HeadIndex(indexes.SearchIndex, indexes.Indexable):
         """
         return [dfn.text for dfn in head.definitions.all()]
 
-    def prepare_head(self, head: Head):
+    def prepare_head_simplified(self, head: Head):
         """
         Convert to search form.
         """

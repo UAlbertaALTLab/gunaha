@@ -26,7 +26,7 @@ def search_entries(query: Optional[str]):
 
     text = query or ""
     return query_set.auto_query(text) | query_set.filter(
-        head__startswith=to_search_form(text)
+        head_simplified__startswith=to_search_form(text)
     )
 
 
