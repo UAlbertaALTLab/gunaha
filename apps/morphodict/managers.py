@@ -64,4 +64,4 @@ class HeadManager(models.Manager):
         mypy v0.770 gets VERY upset (possible import cycle?); instead, do this to return
         the model class:
         """
-        return apps.get_app_config("morphodict").get_model("Head")
+        return apps.get_model("morphodict.Head")
