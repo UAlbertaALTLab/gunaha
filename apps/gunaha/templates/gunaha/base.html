@@ -26,15 +26,22 @@
       <details class="search__advanced-search">
         <summary>Advanced search</summary>
 
-        <fieldset>
-          <legend>Search language</legend>
-          <label>
-            English <input type="checkbox" name="lang" value="eng"
-                           {% if "eng" in languages %}checked{% endif %}>
+        <fieldset class="radio-group">
+          <legend>Search in</legend>
+
+          <label class="radio-group__option">
+            <input type="radio" name="lang" value="eng"
+             {% if languages|length == 1 and "eng" in languages %}checked{% endif %}> English 
           </label>
-          <label>
-            Tsúūt'ínà <input type="checkbox" name="lang" value="srs"
-                           {% if "srs" in languages %}checked{% endif %}>
+
+          <label class="radio-group__option">
+            <input type="radio" name="lang" value="srs"
+             {% if languages|length == 1 and "srs" in languages %}checked{% endif %}> Tsúūt'ínà 
+          </label>
+
+          <label class="radio-group__option">
+            <input type="radio" name="lang" value=""
+             {% if languages|length != 1 %}checked{% endif %}> Both 
           </label>
         </fieldset>
       </details>

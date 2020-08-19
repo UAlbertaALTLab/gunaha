@@ -557,6 +557,23 @@ img {
   background: transparent;
 }
 
+/**
+ * A grouping of radio buttons.
+ *
+ * -- label ---
+ *  (*) option 1  ( ) option 2  ( ) option 3
+ */
+.radio-group {
+  display: flex;
+  flex-flow: row nowrap;
+
+  padding: 1rem 2rem;
+}
+
+.radio-group__option {
+  margin-right: 1em;
+}
+
 
 /**
  * Cards convey prose and definitions.
