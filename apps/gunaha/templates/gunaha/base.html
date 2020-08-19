@@ -16,10 +16,28 @@
     <p class="page-header__subtitle" role="doc-subtitle">{{ langname }} Dictionary</p>
 
     <form class="search" method="GET" action="{% url "gunaha:index" %}">
-      <input type="text" autocorrect="no" class="search__query" name="q"
-      placeholder="Search in English or Tsúūt'ínà"
-      {% if query %}value="{{ query }}"{% endif %}>
-      <button type="submit" class="search__submit"> Search </button>
+      <div class="search__bar">
+        <input type="text" autocorrect="no" class="search__query" name="q"
+        placeholder="Search in English or Tsúūt'ínà"
+        {% if query %}value="{{ query }}"{% endif %}>
+        <button type="submit" class="search__submit"> Search </button>
+      </div>
+
+      <details class="search__advanced-search">
+        <summary>Advanced search</summary>
+
+        <fieldset>
+          <legend>Search language</legend>
+          <label>
+            English <input type="checkbox" name="lang" value="eng"
+                           {% if "eng" in languages %}checked{% endif %}>
+          </label>
+          <label>
+            Tsúūt'ínà <input type="checkbox" name="lang" value="srs"
+                           {% if "srs" in languages %}checked{% endif %}>
+          </label>
+        </fieldset>
+      </details>
     </form>
   </header>
 

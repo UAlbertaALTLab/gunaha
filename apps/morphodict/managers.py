@@ -12,6 +12,8 @@ from haystack.query import EmptySearchQuerySet, SearchQuerySet  # type: ignore
 
 from .util import to_search_form
 
+DEFAULT_LANGUAGES = frozenset(("srs", "eng",))  # Tsuut'ina  # English
+
 
 class HeadManager(models.Manager):
     """
@@ -22,9 +24,7 @@ class HeadManager(models.Manager):
 
     """
 
-    def search(
-        self, query: Optional[str], languages=frozenset(("srs", "eng"))
-    ) -> SearchQuerySet:
+    def search(self, query: Optional[str], languages=None) -> SearchQuerySet:
         """
         Does a full text search based on the dictionary head.
         """
@@ -35,6 +35,9 @@ class HeadManager(models.Manager):
             query_set = EmptySearchQuerySet()
         else:
             query_set = SearchQuerySet().models(Head)
+
+        if not languages:
+            languages = DEFAULT_LANGUAGES
 
         text = query or ""
         result_set = query_set

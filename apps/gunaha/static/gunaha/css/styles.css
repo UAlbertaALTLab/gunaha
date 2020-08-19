@@ -488,7 +488,7 @@ img {
 .page-header {
   background: var(--nc-bg-1);
   border-bottom: 1px solid var(--nc-bg-3);
-  padding: 2rem 1.5rem;
+  padding: 2rem 1.5rem 1rem;
 
   /* This sets the right and left margins to cancel out the body's margins. It's width is still the same, but the background stretches across the page's width. */
 
@@ -518,8 +518,7 @@ img {
   text-decoration: none;
 }
 
-
-.search {
+.search__bar {
   display: flex;
 
   flex-flow: row nowrap;
@@ -548,6 +547,16 @@ img {
   border-top-left-radius: 0;
   border-bottom-left-radius: 0;
 }
+
+.search__advanced-search {
+  border: 0;
+  padding: 0;
+  margin-bottom: 0;
+
+  color: var(--nc-tx-2);
+  background: transparent;
+}
+
 
 /**
  * Cards convey prose and definitions.

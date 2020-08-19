@@ -12,7 +12,9 @@ MAX_RESULTS_PER_PAGE = 30
 
 def index(request):
     query = request.GET.get("q", None)
-    langs = request.GET.get("lang", {"srs", "eng"})
+
+    langs = set(request.GET.getlist("lang"))
+
     results = Head.objects.search(query, languages=langs)
     pages = Paginator(results, MAX_RESULTS_PER_PAGE)
     # page page get page page get get get page get
@@ -20,7 +22,13 @@ def index(request):
     return render(
         request,
         "gunaha/index.html",
-        context={"page": page, "query": query, "paginator": pages, "results": results},
+        context={
+            "page": page,
+            "query": query,
+            "paginator": pages,
+            "results": results,
+            "languages": langs,
+        },
     )
 
 
