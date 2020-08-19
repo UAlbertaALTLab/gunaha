@@ -17,6 +17,14 @@ from .util import to_search_form
 DEFAULT_LANGUAGES = frozenset(("srs", "eng",))  # Tsuut'ina  # English
 
 
+class MorphoDictError(Exception):
+    ...
+
+
+class InvalidLanguageSelectionError(MorphoDictError):
+    ...
+
+
 class HeadManager(models.Manager):
     """
     Customizes search for Head models. Adds the following convenience method:
@@ -31,13 +39,16 @@ class HeadManager(models.Manager):
         Does a full text search based on the dictionary head.
         """
 
+        if not languages:
+            languages = DEFAULT_LANGUAGES
+        elif len(DEFAULT_LANGUAGES.intersection(languages)) == 0:
+            # Cannot search for invalid languages
+            raise InvalidLanguageSelectionError(languages)
+
         if query is None:
             query_set = EmptySearchQuerySet()
         else:
             query_set = SearchQuerySet().models(self.get_model())
-
-        if not languages:
-            languages = DEFAULT_LANGUAGES
 
         text = query or ""
         result_set = query_set

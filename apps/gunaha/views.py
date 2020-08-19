@@ -12,8 +12,11 @@ MAX_RESULTS_PER_PAGE = 30
 
 def index(request):
     query = request.GET.get("q", None)
-
     langs = set(request.GET.getlist("lang"))
+
+    # Treat ?lang= as if all languages are selected
+    if langs == {""}:
+        langs = {}
 
     results = Head.objects.search(query, languages=langs)
     pages = Paginator(results, MAX_RESULTS_PER_PAGE)
