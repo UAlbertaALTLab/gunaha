@@ -5,14 +5,14 @@ from django.core.paginator import Paginator
 from django.http import Http404
 from django.shortcuts import render
 
-from apps.morphodict.search import search_entries
+from apps.morphodict.models import Head
 
 MAX_RESULTS_PER_PAGE = 30
 
 
 def index(request):
     query = request.GET.get("q", None)
-    results = search_entries(query)
+    results = Head.objects.search(query)
     pages = Paginator(results, MAX_RESULTS_PER_PAGE)
     # page page get page page get get get page get
     page = pages.get_page(request.GET.get("page", 1))

@@ -1,5 +1,7 @@
 from django.db import models
 
+from .managers import HeadManager
+
 MAX_HEAD_LENGTH = 64
 MAX_DEFINITION_LENGTH = 256
 BITS_PER_HEX_CHAR = 4
@@ -17,6 +19,12 @@ class Head(models.Model):
 
     text = models.CharField(max_length=MAX_HEAD_LENGTH)
     word_class = models.CharField(max_length=16)
+
+    # Custom model manager:
+    objects = HeadManager()
+    # Enables you to do this:
+    #
+    #   Head.objects.search("dog") -> search results for "dog"
 
     class Meta:
         unique_together = ("text", "word_class")
