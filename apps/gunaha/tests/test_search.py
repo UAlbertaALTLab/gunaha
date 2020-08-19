@@ -55,6 +55,20 @@ def test_search_in_tsuutina_only(search_by_query):
     assertInHTML(f"<li> {escape_html(incorrect_definition)}", page, count=0)
 
 
+def test_search_in_english_only(search_by_query):
+    query = "dog"
+    tsuutina = "tłích'ā"
+    correct_definition = "dog"
+    incorrect_definition = "whiskers"
+
+    res = search_by_query(query, lang="eng")
+    page = res.content.decode("UTF-8")
+
+    assertInHTML(f'<dfn lang="srs"> {escape_html(tsuutina)}', page)
+    assertInHTML(f"<li> {escape_html(correct_definition)}", page)
+    assertInHTML(f"<li> {escape_html(incorrect_definition)}", page, count=0)
+
+
 @pytest.fixture
 def search_by_query(client):
     """
