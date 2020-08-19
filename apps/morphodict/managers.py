@@ -7,9 +7,11 @@ Customize how to query certain models.
 
 from typing import Optional
 
+from django.apps import apps
 from django.db import models
 from haystack.query import EmptySearchQuerySet, SearchQuerySet  # type: ignore
 
+from .apps import MorphoDictConfig
 from .util import to_search_form
 
 DEFAULT_LANGUAGES = frozenset(("srs", "eng",))  # Tsuut'ina  # English
@@ -29,12 +31,15 @@ class HeadManager(models.Manager):
         Does a full text search based on the dictionary head.
         """
 
-        from .models import Head
-
         if query is None:
             query_set = EmptySearchQuerySet()
         else:
-            query_set = SearchQuerySet().models(Head)
+            # We cannot import Head directly —or even reference it by name!— or else
+            # mypy v0.770 gets VERY upset (import cycle?);
+            # instead, do this ugly kludge:
+            Head_ = apps.get_app_config("morphodict").get_model("Head")
+            query_set = SearchQuerySet().models(Head_)
+            # query_set = SearchQuerySet()
 
         if not languages:
             languages = DEFAULT_LANGUAGES
