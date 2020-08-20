@@ -6,21 +6,7 @@ from importlib import import_module
 from typing import Callable
 
 from django.conf import settings
-
-
-@lru_cache
-def get_function(path: str) -> Callable:
-    """
-    Gets a function from a given path.
-    """
-    *module_path, callable_name = path.split(".")
-    module = import_module(".".join(module_path))
-    fn = getattr(module, callable_name)
-
-    if not callable(fn):
-        raise ValueError(f"{path} is not callable")
-
-    return fn
+from django.utils.module_loading import import_string
 
 
 def to_search_form(query: str) -> str:
@@ -35,7 +21,8 @@ def to_search_form(query: str) -> str:
     and again, by the Head.objects.search() when searching for a term in the dictionary
     language.
     """
-    term = get_function(settings.MORPHODICT_TOKEN_TO_SEARCH_FORM)(query)
+    _to_search_form = import_string(settings.MORPHODICT_TOKEN_TO_SEARCH_FORM)
+    term = _to_search_form(query)
     if not isinstance(term, str):
         raise TypeError(f"returns non-string")
     return term
