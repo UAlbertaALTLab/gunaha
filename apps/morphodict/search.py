@@ -24,6 +24,7 @@ class HeadSearchMixin:
         """
         Does a full text search based on the dictionary head.
         """
+        from .models import Head
 
         if not languages:
             languages = DEFAULT_LANGUAGES
@@ -34,7 +35,7 @@ class HeadSearchMixin:
         if query is None:
             query_set = EmptySearchQuerySet()
         else:
-            query_set = SearchQuerySet().models(self.get_model())
+            query_set = SearchQuerySet().models(Head)
 
         text = query or ""
         result_set = query_set
@@ -54,14 +55,6 @@ class HeadSearchMixin:
         self, text: str, query_set: SearchQuerySet
     ) -> SearchQuerySet:
         return query_set.auto_query(text)
-
-    def get_model(self):
-        """
-        We cannot import the Head model directly (or even reference it by name!) or else
-        mypy v0.770 gets VERY upset (possible import cycle?); instead, do this to return
-        the model class:
-        """
-        return apps.get_model("morphodict.Head")
 
 
 def to_search_form(query: str) -> str:
