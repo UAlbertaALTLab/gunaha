@@ -18,13 +18,9 @@ from .util import to_search_form
 DEFAULT_LANGUAGES = frozenset(("srs", "eng",))  # Tsuut'ina  # English
 
 
-class HeadManager(models.Manager):
+class HeadSearchMixin:
     """
-    Customizes search for Head models. Adds the following convenience method:
-
-
-        Head.objects.search(query) -> SearchQuerySet
-
+    Defines the search() method for full-text search on Head models.
     """
 
     def search(self, query: Optional[str], languages=None) -> SearchQuerySet:
@@ -69,3 +65,13 @@ class HeadManager(models.Manager):
         the model class:
         """
         return apps.get_model("morphodict.Head")
+
+
+class HeadManager(models.Manager, HeadSearchMixin):
+    """
+    Customizes search for Head models. Adds the following convenience method:
+
+
+        Head.objects.search(query) -> SearchQuerySet
+
+    """
