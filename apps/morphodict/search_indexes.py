@@ -8,7 +8,7 @@ Enables search using Haystack for models.
 from haystack import indexes  # type: ignore
 
 from .models import Definition, Head
-from .util import to_search_form
+from .search import to_search_form
 
 
 class HeadIndex(indexes.SearchIndex, indexes.Indexable):

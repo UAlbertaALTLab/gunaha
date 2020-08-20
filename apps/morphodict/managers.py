@@ -13,7 +13,7 @@ from haystack.query import EmptySearchQuerySet, SearchQuerySet  # type: ignore
 
 from .apps import MorphoDictConfig
 from .errors import InvalidLanguageError
-from .util import to_search_form
+from .search import to_search_form
 
 DEFAULT_LANGUAGES = frozenset(("srs", "eng",))  # Tsuut'ina  # English
 
