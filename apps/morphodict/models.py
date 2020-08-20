@@ -1,10 +1,21 @@
 from django.db import models
 
-from .managers import HeadManager
+from .search import HeadSearchMixin
 
 MAX_HEAD_LENGTH = 64
 MAX_DEFINITION_LENGTH = 256
 BITS_PER_HEX_CHAR = 4
+
+
+class HeadManager(models.Manager, HeadSearchMixin):
+    """
+    Customizes search for Head models. Adds the following convenience method:
+
+
+        Head.objects.search(query) -> SearchQuerySet
+    """
+
+    # See ./search.py for implementation!
 
 
 class Head(models.Model):
@@ -20,11 +31,10 @@ class Head(models.Model):
     text = models.CharField(max_length=MAX_HEAD_LENGTH)
     word_class = models.CharField(max_length=16)
 
-    # Custom model manager:
-    objects = HeadManager()
     # Enables you to do this:
     #
     #   Head.objects.search("dog") -> search results for "dog"
+    objects = HeadManager()
 
     class Meta:
         unique_together = ("text", "word_class")
