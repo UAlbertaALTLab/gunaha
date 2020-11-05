@@ -15,7 +15,7 @@
     <h1 class="page-header__title"><a class="title-link" href="{% url 'gunaha:index' %}">{{ sitename }}</a></h1>
     <p class="page-header__subtitle" role="doc-subtitle">{{ langname }} Dictionary</p>
 
-    <form class="search" method="GET" action="{% url "gunaha:index" %}">
+    <form class="search" role="search" method="GET" action="{% url "gunaha:index" %}">
       <div class="search__bar">
         <input type="text" autocorrect="no" class="search__query" name="q"
         placeholder="Search in English or Tsúūt'ínà"
