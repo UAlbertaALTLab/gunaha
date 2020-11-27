@@ -101,8 +101,8 @@ INSTALLED_APPS = [
     # Third-party
     "haystack",
     # Local
-    "apps.gunaha.apps.GunahaConfig",
     "apps.morphodict.apps.MorphoDictConfig",
+    "apps.gunaha.apps.GunahaConfig",
 ]
 
 MIDDLEWARE = [
