@@ -85,7 +85,7 @@ def import_dictionary(purge: bool = False) -> None:
         last_import_sha384=file_hash,
     )
 
-    heads: Dict[int, Head] = {}
+    heads: Dict[str, Head] = {}
     definitions: Dict[int, Definition] = {}
     mappings: Set[Tuple[int, int]] = set()
 
