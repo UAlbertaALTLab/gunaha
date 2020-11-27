@@ -3,6 +3,7 @@ from django.db import models
 from .search import HeadSearchMixin
 
 MAX_HEAD_LENGTH = 64
+MAX_ENTRY_ID_LENGTH = 8
 MAX_DEFINITION_LENGTH = 256
 BITS_PER_HEX_CHAR = 4
 
@@ -27,6 +28,12 @@ class Head(models.Model):
         - a wordform
             - a wordform that is a lemma
     """
+
+    entry_id = models.CharField(
+        primary_key=True,
+        max_length=MAX_ENTRY_ID_LENGTH,
+        help_text="Unique ID for this head.",
+    )
 
     text = models.CharField(max_length=MAX_HEAD_LENGTH)
     word_class = models.CharField(max_length=16)
@@ -127,3 +134,7 @@ class Definition(models.Model):
 
     # A definition **cites** one or more dictionary sources.
     citations = models.ManyToManyField(DictionarySource)
+
+    def __str__(self) -> str:
+        return f"{self.text}"
+

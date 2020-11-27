@@ -51,7 +51,7 @@ def import_dictionary(purge: bool = False) -> None:
     path_to_tsv = private_dir / filename
     if not path_to_tsv.exists():
         # TODO: raise an error
-        logger.warn("Cannot find dictionary file @ %s. Skipping...", path_to_tsv)
+        logger.error("Cannot find dictionary file @ %s. Skipping...", path_to_tsv)
         return
 
     with open(path_to_tsv, "rb") as raw_file:
@@ -96,8 +96,12 @@ def import_dictionary(purge: bool = False) -> None:
         if should_skip_importing_head(term, entry):
             continue
 
+        ############################# Insert word ######################################
+
         word_class = entry["Part of speech"]
-        primary_key = make_primary_key(term, word_class)
+        primary_key = entry["ID"]
+        # setdefault() will only insert an entry the first time on duplicates.
+        # the first entry in the spreadsheet usually has the most information
         head = heads.setdefault(
             primary_key, Head(pk=primary_key, text=term, word_class=word_class)
         )
@@ -105,13 +109,24 @@ def import_dictionary(purge: bool = False) -> None:
         # TODO: tag certain words as "not suitable for school" -- I guess NSFW?
         # TODO: tag heads with "Folio" -- more specifically where the word came from
 
+        ########################## Insert definition ###################################
+
         definition = nfc(entry["Bruce - English text"])
         if not definition:
             continue
 
         pk = make_primary_key(definition, str(head.pk))
         dfn = Definition(pk=pk, text=definition, defines=head)
-        definitions[pk] = dfn
+        if pk in definitions:
+            old_definition = definitions[pk]
+            if dfn.text != old_definition.text:
+                logger.error(f"hash collision: {dfn} / {old_definition}")
+                continue
+            else:
+                logger.info("Duplicate definition: {dfn}")
+        else:
+            definitions[pk] = dfn
+
         mappings.add((pk, onespot.pk))
 
     logger.info(
@@ -150,6 +165,9 @@ def should_skip_importing_head(head: str, info: dict) -> bool:
 
 
 def make_primary_key(*args: str) -> int:
+    """
+    Creates a hash of the arguments.
+    """
     number = int(sha1("\n".join(args).encode("UTF-8")).hexdigest(), base=16)
     return number & 0xFFFFFFFF
 
