@@ -29,7 +29,7 @@ tqdm = "^4.46.0"
 python-levenshtein = "^0.12.0"
 django-debug-toolbar = "^2.2"
 django-stubs = "^1.5.0"
-mypy = ">=0.770,<0.780"
+mypy = "^0.790"
 pytest-xdist = "^2.0.0"
 
 [tool.black]
