@@ -109,17 +109,9 @@ class DictionarySource(models.Model):
         abbrv = self.abbrv
         title = self.title
 
-        # Both of these are optional:
-        author = self.author
-        editor = self.editor
+        author_or_editor = f"(Ed. {self.editor})"
 
-        author_or_editor = ""
-        if author:
-            author_or_editor += f" by {author}"
-        if editor:
-            author_or_editor += f" (Ed. {editor})"
-
-        return f"[{abbrv}]: “{title}”{author_or_editor}"
+        return f"[{abbrv}]: “{title}” {author_or_editor}"
 
 
 class Definition(models.Model):
