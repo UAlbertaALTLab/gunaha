@@ -15,6 +15,7 @@ environs = "^8.0.0"
 django-haystack = "^2.8.1"
 whoosh = "^2.7.4"
 requests = "^2.24.0"
+pydub = "^0.24.1"
 
 [tool.poetry.dev-dependencies]
 black = "^19.10b0"
