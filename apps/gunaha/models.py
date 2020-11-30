@@ -25,3 +25,14 @@ class OnespotDuplicate(models.Model):
 
     def __str__(self) -> str:
         return f"{self.entry_id} → {self.duplicate_of.pk}"
+
+
+class Recording(models.Model):
+    """
+    A recording of Bruce saying a particular word.
+    """
+
+    entry = models.ForeignKey(
+        Head, on_delete=models.CASCADE, help_text="recording of what head?"
+    )
+    compressed_audio = models.FileField(upload_to="recordings")
