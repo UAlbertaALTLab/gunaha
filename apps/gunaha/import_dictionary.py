@@ -86,6 +86,8 @@ def import_dictionary(purge: bool = False) -> None:
     )
 
     heads: Dict[str, Head] = {}
+    # In case the same head maps to an existing entry ID
+    text_wc_to_id: Dict[Tuple[str, str], str] = {}
     definitions: Dict[int, Definition] = {}
     mappings: Set[Tuple[int, int]] = set()
 
@@ -96,10 +98,17 @@ def import_dictionary(purge: bool = False) -> None:
         if should_skip_importing_head(term, entry):
             continue
 
-        ############################# Insert word ######################################
+        ############################# Prepare head #####################################
+
+        primary_key = entry["ID"]
 
         word_class = entry["Part of speech"]
-        primary_key = entry["ID"]
+        unique_tag = (term, word_class)
+
+        if existing_entry := text_wc_to_id.get(unique_tag):
+            raise Exception(f"{unique_tag} exists for {existing_entry} and {primary_key}")
+        text_wc_to_id[unique_tag] = primary_key
+
         # setdefault() will only insert an entry the first time on duplicates.
         # the first entry in the spreadsheet usually has the most information
         head = heads.setdefault(
@@ -109,7 +118,7 @@ def import_dictionary(purge: bool = False) -> None:
         # TODO: tag certain words as "not suitable for school" -- I guess NSFW?
         # TODO: tag heads with "Folio" -- more specifically where the word came from
 
-        ########################## Insert definition ###################################
+        ########################## Prepare definition ##################################
 
         definition = nfc(entry["Bruce - English text"])
         if not definition:
