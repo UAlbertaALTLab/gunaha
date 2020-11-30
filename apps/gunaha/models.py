@@ -14,8 +14,14 @@ class OnespotDuplicate(models.Model):
     duplicates.
     """
 
-    entry_id = models.CharField(max_length=ONESPOT_ID_LEN, primary_key=True)
-    duplicate_of = models.ForeignKey(Head, on_delete=models.CASCADE)
+    entry_id = models.CharField(
+        max_length=ONESPOT_ID_LEN,
+        primary_key=True,
+        help_text="Onespot ID of the duplicate entry",
+    )
+    duplicate_of = models.ForeignKey(
+        Head, on_delete=models.CASCADE, help_text="The entry that is a duplicate of."
+    )
 
     def __str__(self) -> str:
         return f"{self.entry_id} → {self.duplicate_of.pk}"
