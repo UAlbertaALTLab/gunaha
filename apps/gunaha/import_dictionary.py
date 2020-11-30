@@ -27,12 +27,13 @@ import re
 from collections import defaultdict
 from hashlib import sha1, sha384
 from pathlib import Path
-from typing import Dict, Set, Tuple
+from typing import Dict, List, Set, Tuple
 
 from django.conf import settings
 from django.db import transaction
 from django.db.utils import OperationalError
 
+from apps.gunaha.models import OnespotDuplicate
 from apps.morphodict.models import Definition, DictionarySource, Head
 
 from .orthography import nfc, normalize_orthography
@@ -88,6 +89,7 @@ def import_dictionary(purge: bool = False) -> None:
     heads: Dict[str, Head] = {}
     # In case the same head maps to an existing entry ID
     text_wc_to_id: Dict[Tuple[str, str], str] = {}
+    duplicates: List[OnespotDuplicate] = []
     definitions: Dict[int, Definition] = {}
     mappings: Set[Tuple[int, int]] = set()
 
@@ -106,8 +108,17 @@ def import_dictionary(purge: bool = False) -> None:
         unique_tag = (term, word_class)
 
         if existing_entry := text_wc_to_id.get(unique_tag):
-            raise Exception(f"{unique_tag} exists for {existing_entry} and {primary_key}")
-        text_wc_to_id[unique_tag] = primary_key
+            duplicates.append(
+                OnespotDuplicate(
+                    entry_id=primary_key, duplicate_of=heads[existing_entry]
+                )
+            )
+            logger.info(
+                "%s (%r) is a duplicate of %s", primary_key, unique_tag, existing_entry
+            )
+            primary_key = existing_entry
+        else:
+            text_wc_to_id[unique_tag] = primary_key
 
         # setdefault() will only insert an entry the first time on duplicates.
         # the first entry in the spreadsheet usually has the most information
@@ -150,6 +161,7 @@ def import_dictionary(purge: bool = False) -> None:
             Definition2Source(definition_id=def_pk, dictionarysource_id=dict_pk)
             for def_pk, dict_pk in mappings
         )
+        OnespotDuplicate.objects.bulk_create(duplicates)
 
     logger.info("Done importing from %s", path_to_tsv)
 
