@@ -73,6 +73,13 @@ with env.prefixed("STATIC_"):
     # The URL prefix for all static files. MUST end with a slash!
     STATIC_URL = env("URL", "/static/")
 
+############################# ENV: MEDIA  FILES ##############################
+
+# Uploaded media files.
+# In Gūnáhà, this includes the recorded audio
+with env.prefixed("MEDIA_"):
+    MEDIA_ROOT = env("ROOT", os.fspath(DATA_DIR / "media"))
+    MEDIA_URL = env("URL", "/media/")
 
 ################################# VALIDATION #################################
 
