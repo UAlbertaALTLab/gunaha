@@ -32,6 +32,7 @@ django-debug-toolbar = "^2.2"
 django-stubs = "^1.5.0"
 mypy = "^0.790"
 pytest-xdist = "^2.0.0"
+django-extensions = "^3.1.0"
 
 [tool.black]
 exclude = "migrations"

@@ -112,6 +112,9 @@ INSTALLED_APPS = [
     "apps.gunaha.apps.GunahaConfig",
 ]
 
+if DEBUG:
+    INSTALLED_APPS.append("django_extensions")
+
 MIDDLEWARE = [
     "django.middleware.security.SecurityMiddleware",
     "django.contrib.sessions.middleware.SessionMiddleware",
