@@ -631,3 +631,24 @@ img {
 .query {
   font-weight: bold;
 }
+
+/**
+ * Overrides for the <header> of dictionary heads.
+ */
+.head__heading {
+  display: inline;
+  border-bottom: 0;
+}
+
+.head {
+  border-bottom: 1px solid var(--nc-bg-2);
+}
+
+.head__play-button {
+  display: inline-block;
+  padding: 0;
+  font-size: 1.75em;
+  background: transparent;
+  margin-left: 1ch;
+  border-radius: 0;
+}
