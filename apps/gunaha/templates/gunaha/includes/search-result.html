@@ -12,7 +12,7 @@
 <article class="card card--definition">
   <header class="head">
     <h2 class="head__heading"><dfn lang="srs">{{ result.head }}</dfn></h2>
-    {% include "gunaha/includes/play-recording.html" %}
+    {% include "gunaha/includes/play-recording.html" with recording=result.object.recording_set.first %}
   </header>
 
   <ol>

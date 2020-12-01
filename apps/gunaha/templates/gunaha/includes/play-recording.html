@@ -4,13 +4,13 @@
   Displays a 🔊 button that can be clicked to hear the recording.
 
   Parameters:
-   - recording: an instance of the Recording model
+   - recording: an instance of the Recording model or None
 
 {% endcomment %}
-{% if result.object.recording_set.first %}
+{% if recording %}
   <span class="head__audio">
     <button class="head__play-button" type="button" aria-label="Play recording" onclick="playAudio(this)">🔊</button>
-    <audio autoplay=false preload=none src="{{ result.object.recording_set.first.compressed_audio.url }}"></audio>
+    <audio autoplay=false preload=none src="{{ recording.compressed_audio.url }}"></audio>
   </span>
 {% endif %}
 {% endspaceless %}
