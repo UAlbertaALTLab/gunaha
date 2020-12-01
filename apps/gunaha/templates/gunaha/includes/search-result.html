@@ -12,12 +12,7 @@
 <article class="card card--definition">
   <header class="head">
     <h2 class="head__heading"><dfn lang="srs">{{ result.head }}</dfn></h2>
-    {% if result.object.recording_set.first %}
-      <span class="head__audio">
-        <button class="head__play-button" type="button" aria-label="Play recording" onclick="playAudio(this)">🔊</button>
-        <audio autoplay=false preload=none src="{{ result.object.recording_set.first.compressed_audio.url }}"></audio>
-      </span>
-    {% endif %}
+    {% include "gunaha/includes/play-recording.html" %}
   </header>
 
   <ol>
