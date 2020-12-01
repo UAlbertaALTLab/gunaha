@@ -17,8 +17,12 @@ RUN set -ex \
         && BUILD_DEPS=" \
         build-essential \
         " \
+        && RUNTIME_DEPS=" \
+        ffmpeg \
+        " \
         && apt-get update \
         && apt-get install -y --no-install-recommends $BUILD_DEPS \
+        && apt-get install -y --no-install-recommends $RUNTIME_DEPS \
         && pip install --no-cache-dir -r /app/requirements.txt \
         && pip install --no-cache-dir uwsgi \
         && apt-get purge -y --auto-remove -o APT::AutoRemove:RecommendsImportant=false $BUILD_DEPS \

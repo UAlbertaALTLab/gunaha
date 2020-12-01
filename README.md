@@ -4,9 +4,13 @@ On-line Tsuut'ina Dictionary
 
 ## Setup
 
-This project uses [Poetry].
+You will need:
 
-To install everything, do the following:
+ - Python 3.8+
+ - [ffmpeg](https://ffmpeg.org/) (`sudo apt install ffmpeg`/`brew install ffmpeg`)
+ - [Poetry]
+
+To install all the Python dependencies, do the following:
 
     poetry install
 
@@ -19,7 +23,7 @@ This will generate the `.env` file for the first time:
 
 ## Deployment on `altlab-itw`
 
-As of 2020-08-18 this app is very JANKILY deployed on `altlab-itw`. Let
+As of 2020-12-01 this app is very JANKILY deployed on `altlab-itw`. Let
 me walk you through it (my dignity will not survive this):
 
  1. On pushes to the default branch, [a GitHub action][action] builds
@@ -57,7 +61,11 @@ me walk you through it (my dignity will not survive this):
 
             # ./manage.py importdictionary --purge
 
-     3. update or rebuild the search indices
+     3. import the recordings
+
+            # ./manage.py importrecordings
+
+     4. update or rebuild the search indices
 
             # ./manage.py rebuild_indexes
 
