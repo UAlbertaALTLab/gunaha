@@ -7,6 +7,32 @@
   <title>{%block pagetitle %}{% if query %}🔍 {{ query }} | {% endif %}{{ sitename }} — {{ langname }} dictionary{% endblock %}</title>
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <link rel="stylesheet" href="{% static "gunaha/css/styles.css" %}">
+  <style>
+    .head__heading {
+      display: inline;
+      border-bottom: 0;
+    }
+
+    .head {
+      border-bottom: 1px solid var(--nc-bg-2);
+    }
+
+    .head__play-button {
+      display: inline-block;
+      padding: 0;
+      font-size: 1.75em;
+      background: transparent;
+      margin-left: 1ch;
+      border-radius: 0;
+    }
+  </style>
+  <script>
+    function playAudio(button) {
+      var parent = button.parentNode;
+      var audio = parent.querySelector('audio');
+      audio.play();
+    }
+  </script>
   {% endspaceless %}
 </head>
 <body class="site">
