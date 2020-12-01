@@ -10,7 +10,7 @@
 {% if recording %}
   <span class="head__audio">
     <button class="head__play-button" type="button" aria-label="Play recording" onclick="playAudio(this)">🔊</button>
-    <audio autoplay=false preload=none src="{{ recording.compressed_audio.url }}"></audio>
+    <audio preload=none src="{{ recording.compressed_audio.url }}"></audio>
   </span>
 {% endif %}
 {% endspaceless %}
