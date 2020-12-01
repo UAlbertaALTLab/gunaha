@@ -12,6 +12,15 @@
 <article class="card card--definition">
   <header>
     <h2><dfn lang="srs">{{ result.head }}</dfn></h2>
+
+    {% if result.object.recording_set.all|length > 0 %}
+      <ul>
+        {% for recording in result.object.recording_set.all %}
+          <li>
+            <audio controls autoplay=false preload=none src="{{ recording.compressed_audio.url }}"></audio>
+        {% endfor %}
+      </ul>
+    {% endif %}
   </header>
 
   <ol>
