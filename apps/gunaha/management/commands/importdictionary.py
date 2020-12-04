@@ -24,6 +24,14 @@ class Command(BaseCommand):
         )
 
     def handle(self, *args, **options) -> None:
-        from apps.gunaha.import_dictionary import import_dictionary
+        # Import here because I'm assuming there will be weird Django side-effects
+        # otherwise :/
+        from apps.gunaha.import_dictionary import (
+            import_dictionary,
+            DictionaryImportError,
+        )
 
-        import_dictionary(purge=options["purge"])
+        try:
+            import_dictionary(purge=options["purge"])
+        except DictionaryImportError as error:
+            raise CommandError(str(error))

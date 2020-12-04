@@ -57,7 +57,7 @@ def import_dictionary(purge: bool = False) -> None:
     filename = "Onespot-Sapir-Vocabulary-list-OS-Vocabulary.tsv"
     path_to_tsv = private_dir / filename
     if not path_to_tsv.exists():
-        raise DictionaryImportError("Cannot find dictionary file @ {path_to_tsv}.")
+        raise DictionaryImportError(f"Cannot find dictionary file: {path_to_tsv}")
 
     with open(path_to_tsv, "rb") as raw_file:
         raw_bytes = raw_file.read()
