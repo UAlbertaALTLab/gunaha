@@ -116,25 +116,8 @@ class OnespotWordlistImporter:
             if head is None:
                 continue
 
-            ########################## Prepare definition ##################################
-
-            definition = nfc(entry["Bruce - English text"])
-            if not definition:
-                continue
-
-            pk = make_primary_key(definition, str(head.pk))
-            dfn = Definition(pk=pk, text=definition, defines=head)
-            if pk in definitions:
-                old_definition = definitions[pk]
-                if dfn.text != old_definition.text:
-                    logger.error(f"hash collision: {dfn} / {old_definition}")
-                    continue
-                else:
-                    logger.info("Duplicate definition: {dfn}")
-            else:
-                definitions[pk] = dfn
-
-            mappings.add((pk, self.dictionary_source.pk))
+            # TODO: this entry might define the PREVIOUS entry?
+            self.prepare_definition_from_entry(entry, head)
 
         logger.info(
             "Will insert: heads: %d, defs: %d", len(heads), len(definitions),
@@ -195,6 +178,26 @@ class OnespotWordlistImporter:
         return self.heads.setdefault(
             primary_key, Head(pk=primary_key, text=term, word_class=word_class)
         )
+
+    def prepare_definition_from_entry(self, entry: Dict[str, str], head: Head) -> None:
+        definition = nfc(entry["Bruce - English text"])
+
+        if not definition:
+            # This entry does not provide a definition. Shoganai.
+            return
+
+        pk = make_primary_key(definition, str(head.pk))
+        dfn = Definition(pk=pk, text=definition, defines=head)
+
+        if old_definition := self.definitions.get(pk):
+            if dfn.text != old_definition.text:
+                raise DictionaryImportError(f"hash collision: {dfn} / {old_definition}")
+            else:
+                logger.info(f"Duplicate definition: “{dfn}”")
+        else:
+            self.definitions[pk] = dfn
+
+        self.mappings.add((pk, self.dictionary_source.pk))
 
     @property
     def filename(self) -> str:
