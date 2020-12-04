@@ -76,9 +76,12 @@ class OnespotWordlistImporter:
         self.raw_bytes = path_to_tsv.read_bytes()
         self.file_hash = compute_hash_of_source(self.raw_bytes)
 
-        # Purge only once we KNOW we can read the dictionary.
-        if purge:
-            purge_all_existing_entries()
+        # Data structures required during import:
+        self.heads: Dict[str, Head] = {}
+        self.text_wc_to_id: Dict[Tuple[str, str], str] = {}
+        self.duplicates: List[OnespotDuplicate] = []
+        self.definitions: Dict[int, Definition] = {}
+        self.mappings: Set[Tuple[int, int]] = set()
 
     def run(self) -> None:
         if not should_import_onespot(self.file_hash):
@@ -92,12 +95,12 @@ class OnespotWordlistImporter:
 
         logger.info("Importing %s [SHA-384: %s]", path_to_tsv, file_hash)
 
-        heads: Dict[str, Head] = {}
+        heads = self.heads
         # In case the same head maps to an existing entry ID
-        text_wc_to_id: Dict[Tuple[str, str], str] = {}
-        duplicates: List[OnespotDuplicate] = []
-        definitions: Dict[int, Definition] = {}
-        mappings: Set[Tuple[int, int]] = set()
+        text_wc_to_id = self.text_wc_to_id
+        duplicates = self.duplicates
+        definitions = self.definitions
+        mappings = self.mappings
 
         onespot = DictionarySource(
             abbrv="Onespot",
