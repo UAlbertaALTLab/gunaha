@@ -38,6 +38,10 @@ from apps.morphodict.models import Definition, DictionarySource, Head
 
 from .orthography import nfc, normalize_orthography
 
+# We populate the “through” model linking Definitions to their sources directly,
+# because that is WAY more efficient than adding a source to each Definition manually.
+Definition2Source = Definition.citations.through
+
 logger = logging.getLogger(__name__)
 
 private_dir = settings.DATA_DIR / "private"
@@ -51,8 +55,6 @@ class DictionaryImportError(RuntimeError):
 
 def import_dictionary(purge: bool = False) -> None:
     logger.info("Importing OneSpot-Sapir vocabulary list")
-
-    Definition2Source = Definition.citations.through
 
     filename = "Onespot-Sapir-Vocabulary-list-OS-Vocabulary.tsv"
     path_to_tsv = private_dir / filename
