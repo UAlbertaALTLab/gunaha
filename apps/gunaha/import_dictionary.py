@@ -75,6 +75,7 @@ class OnespotWordlistImporter:
         self.path_to_tsv = path_to_tsv
         self.raw_bytes = path_to_tsv.read_bytes()
         self.file_hash = compute_hash_of_source(self.raw_bytes)
+        self.dictionary_source = self.create_source_for_onespot_wordlist()
 
         # Data structures required during import:
         self.heads: Dict[str, Head] = {}
@@ -101,14 +102,6 @@ class OnespotWordlistImporter:
         duplicates = self.duplicates
         definitions = self.definitions
         mappings = self.mappings
-
-        onespot = DictionarySource(
-            abbrv="Onespot",
-            title="Onespot-Sapir vocabulary list",
-            editor="Bruce Starlight, John Onespot, Edward Sapir",
-            import_filename=filename,
-            last_import_sha384=file_hash,
-        )
 
         logger.info("Importing %s [SHA-384: %s]", path_to_tsv, file_hash)
         tsv_file = io.StringIO(raw_bytes.decode("UTF-8"))
@@ -170,14 +163,14 @@ class OnespotWordlistImporter:
             else:
                 definitions[pk] = dfn
 
-            mappings.add((pk, onespot.pk))
+            mappings.add((pk, self.dictionary_source.pk))
 
         logger.info(
             "Will insert: heads: %d, defs: %d", len(heads), len(definitions),
         )
 
         with transaction.atomic():
-            DictionarySource.objects.bulk_create([onespot])
+            DictionarySource.objects.bulk_create([self.dictionary_source])
             Head.objects.bulk_create(heads.values())
             Definition.objects.bulk_create(definitions.values())
             Definition2Source.objects.bulk_create(
@@ -187,6 +180,19 @@ class OnespotWordlistImporter:
             OnespotDuplicate.objects.bulk_create(duplicates)
 
         logger.info("Done importing from %s", path_to_tsv)
+
+    @property
+    def filename(self) -> str:
+        return self.path_to_tsv.name
+
+    def create_source_for_onespot_wordlist(self) -> DictionarySource:
+        return DictionarySource(
+            abbrv="Onespot",
+            title="Onespot-Sapir vocabulary list",
+            editor="Bruce Starlight, John Onespot, Edward Sapir",
+            import_filename=self.filename,
+            last_import_sha384=self.file_hash,
+        )
 
 
 def should_skip_importing_head(head: str, info: dict) -> bool:
