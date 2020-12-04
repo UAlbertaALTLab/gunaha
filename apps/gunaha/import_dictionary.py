@@ -68,26 +68,24 @@ def import_dictionary(purge: bool = False) -> None:
 class OnespotWordlistImporter:
     def __init__(self, path_to_tsv: Path, purge: bool) -> None:
         self.path_to_tsv = path_to_tsv
-
-        with open(path_to_tsv, "rb") as raw_file:
-            self.raw_bytes = raw_bytes = raw_file.read()
+        self.raw_bytes = path_to_tsv.read_bytes()
+        self.file_hash = compute_hash_of_source(self.raw_bytes)
 
         # Purge only once we KNOW we can read the dictionary.
         if purge:
             purge_all_existing_entries()
 
-        self.file_hash = file_hash = compute_hash_of_source(raw_bytes)
-        if not should_import_onespot(file_hash):
-            logger.info("Already imported %s; skipping...", path_to_tsv)
+    def run(self) -> None:
+        if not should_import_onespot(self.file_hash):
+            logger.info("Already imported %s; skipping...", self.path_to_tsv)
             return
 
-        logger.info("Importing %s [SHA-384: %s]", path_to_tsv, file_hash)
-
-    def run(self) -> None:
         path_to_tsv = self.path_to_tsv
         filename = path_to_tsv.name
         file_hash = self.file_hash
         raw_bytes = self.raw_bytes
+
+        logger.info("Importing %s [SHA-384: %s]", path_to_tsv, file_hash)
 
         heads: Dict[str, Head] = {}
         # In case the same head maps to an existing entry ID
