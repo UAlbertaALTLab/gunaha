@@ -60,110 +60,119 @@ def import_dictionary(purge: bool = False) -> None:
     path_to_tsv = private_dir / filename
     if not path_to_tsv.exists():
         raise DictionaryImportError(f"Cannot find dictionary file: {path_to_tsv}")
+    OnespotWordlistImporter(path_to_tsv, purge)
 
-    with open(path_to_tsv, "rb") as raw_file:
-        raw_bytes = raw_file.read()
 
-    # Purge only once we KNOW we can read the dictionary.
-    if purge:
-        purge_all_existing_entries()
+class OnespotWordlistImporter:
+    def __init__(self, path_to_tsv: Path, purge: bool) -> None:
+        with open(path_to_tsv, "rb") as raw_file:
+            raw_bytes = raw_file.read()
 
-    file_hash = compute_hash_of_source(raw_bytes)
-    if not should_import_onespot(file_hash):
-        logger.info("Already imported %s; skipping...", path_to_tsv)
-        return
+        # Purge only once we KNOW we can read the dictionary.
+        if purge:
+            purge_all_existing_entries()
 
-    logger.info("Importing %s [SHA-384: %s]", path_to_tsv, file_hash)
+        file_hash = compute_hash_of_source(raw_bytes)
+        if not should_import_onespot(file_hash):
+            logger.info("Already imported %s; skipping...", path_to_tsv)
+            return
 
-    heads: Dict[str, Head] = {}
-    # In case the same head maps to an existing entry ID
-    text_wc_to_id: Dict[Tuple[str, str], str] = {}
-    duplicates: List[OnespotDuplicate] = []
-    definitions: Dict[int, Definition] = {}
-    mappings: Set[Tuple[int, int]] = set()
+        logger.info("Importing %s [SHA-384: %s]", path_to_tsv, file_hash)
 
-    onespot = DictionarySource(
-        abbrv="Onespot",
-        title="Onespot-Sapir vocabulary list",
-        editor="Bruce Starlight, John Onespot, Edward Sapir",
-        import_filename=filename,
-        last_import_sha384=file_hash,
-    )
+        filename = path_to_tsv.name
 
-    logger.info("Importing %s [SHA-384: %s]", path_to_tsv, file_hash)
-    tsv_file = io.StringIO(raw_bytes.decode("UTF-8"))
-    entries = csv.DictReader(tsv_file, delimiter="\t")
+        heads: Dict[str, Head] = {}
+        # In case the same head maps to an existing entry ID
+        text_wc_to_id: Dict[Tuple[str, str], str] = {}
+        duplicates: List[OnespotDuplicate] = []
+        definitions: Dict[int, Definition] = {}
+        mappings: Set[Tuple[int, int]] = set()
 
-    for entry in entries:
-        term = normalize_orthography(entry["Bruce - Tsuut'ina text"])
-
-        if should_skip_importing_head(term, entry):
-            continue
-
-        ############################# Prepare head #####################################
-
-        primary_key = entry["ID"]
-
-        word_class = entry["Part of speech"]
-        unique_tag = (term, word_class)
-
-        if existing_entry := text_wc_to_id.get(unique_tag):
-            duplicates.append(
-                OnespotDuplicate(
-                    entry_id=primary_key, duplicate_of=heads[existing_entry]
-                )
-            )
-            logger.info(
-                "%s (%r) is a duplicate of %s", primary_key, unique_tag, existing_entry
-            )
-            primary_key = existing_entry
-        else:
-            text_wc_to_id[unique_tag] = primary_key
-
-        # setdefault() will only insert an entry the first time on duplicates.
-        # the first entry in the spreadsheet usually has the most information
-        head = heads.setdefault(
-            primary_key, Head(pk=primary_key, text=term, word_class=word_class)
+        onespot = DictionarySource(
+            abbrv="Onespot",
+            title="Onespot-Sapir vocabulary list",
+            editor="Bruce Starlight, John Onespot, Edward Sapir",
+            import_filename=filename,
+            last_import_sha384=file_hash,
         )
 
-        # TODO: tag certain words as "not suitable for school" -- I guess NSFW?
-        # TODO: tag heads with "Folio" -- more specifically where the word came from
+        logger.info("Importing %s [SHA-384: %s]", path_to_tsv, file_hash)
+        tsv_file = io.StringIO(raw_bytes.decode("UTF-8"))
+        entries = csv.DictReader(tsv_file, delimiter="\t")
 
-        ########################## Prepare definition ##################################
+        for entry in entries:
+            term = normalize_orthography(entry["Bruce - Tsuut'ina text"])
 
-        definition = nfc(entry["Bruce - English text"])
-        if not definition:
-            continue
-
-        pk = make_primary_key(definition, str(head.pk))
-        dfn = Definition(pk=pk, text=definition, defines=head)
-        if pk in definitions:
-            old_definition = definitions[pk]
-            if dfn.text != old_definition.text:
-                logger.error(f"hash collision: {dfn} / {old_definition}")
+            if should_skip_importing_head(term, entry):
                 continue
+
+            ############################# Prepare head #####################################
+
+            primary_key = entry["ID"]
+
+            word_class = entry["Part of speech"]
+            unique_tag = (term, word_class)
+
+            if existing_entry := text_wc_to_id.get(unique_tag):
+                duplicates.append(
+                    OnespotDuplicate(
+                        entry_id=primary_key, duplicate_of=heads[existing_entry]
+                    )
+                )
+                logger.info(
+                    "%s (%r) is a duplicate of %s",
+                    primary_key,
+                    unique_tag,
+                    existing_entry,
+                )
+                primary_key = existing_entry
             else:
-                logger.info("Duplicate definition: {dfn}")
-        else:
-            definitions[pk] = dfn
+                text_wc_to_id[unique_tag] = primary_key
 
-        mappings.add((pk, onespot.pk))
+            # setdefault() will only insert an entry the first time on duplicates.
+            # the first entry in the spreadsheet usually has the most information
+            head = heads.setdefault(
+                primary_key, Head(pk=primary_key, text=term, word_class=word_class)
+            )
 
-    logger.info(
-        "Will insert: heads: %d, defs: %d", len(heads), len(definitions),
-    )
+            # TODO: tag certain words as "not suitable for school" -- I guess NSFW?
+            # TODO: tag heads with "Folio" -- more specifically where the word came from
 
-    with transaction.atomic():
-        DictionarySource.objects.bulk_create([onespot])
-        Head.objects.bulk_create(heads.values())
-        Definition.objects.bulk_create(definitions.values())
-        Definition2Source.objects.bulk_create(
-            Definition2Source(definition_id=def_pk, dictionarysource_id=dict_pk)
-            for def_pk, dict_pk in mappings
+            ########################## Prepare definition ##################################
+
+            definition = nfc(entry["Bruce - English text"])
+            if not definition:
+                continue
+
+            pk = make_primary_key(definition, str(head.pk))
+            dfn = Definition(pk=pk, text=definition, defines=head)
+            if pk in definitions:
+                old_definition = definitions[pk]
+                if dfn.text != old_definition.text:
+                    logger.error(f"hash collision: {dfn} / {old_definition}")
+                    continue
+                else:
+                    logger.info("Duplicate definition: {dfn}")
+            else:
+                definitions[pk] = dfn
+
+            mappings.add((pk, onespot.pk))
+
+        logger.info(
+            "Will insert: heads: %d, defs: %d", len(heads), len(definitions),
         )
-        OnespotDuplicate.objects.bulk_create(duplicates)
 
-    logger.info("Done importing from %s", path_to_tsv)
+        with transaction.atomic():
+            DictionarySource.objects.bulk_create([onespot])
+            Head.objects.bulk_create(heads.values())
+            Definition.objects.bulk_create(definitions.values())
+            Definition2Source.objects.bulk_create(
+                Definition2Source(definition_id=def_pk, dictionarysource_id=dict_pk)
+                for def_pk, dict_pk in mappings
+            )
+            OnespotDuplicate.objects.bulk_create(duplicates)
+
+        logger.info("Done importing from %s", path_to_tsv)
 
 
 def should_skip_importing_head(head: str, info: dict) -> bool:
