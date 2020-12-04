@@ -85,7 +85,6 @@ class OnespotWordlistImporter:
         self.text_wc_to_id: Dict[Tuple[str, str], str] = {}
         self.duplicates: List[OnespotDuplicate] = []
         self.definitions: Dict[int, Definition] = {}
-        self.mappings: Set[Tuple[int, int]] = set()
 
     @property
     def filename(self) -> str:
@@ -176,20 +175,23 @@ class OnespotWordlistImporter:
         else:
             self.definitions[pk] = dfn
 
-        self.mappings.add((pk, self.dictionary_source.pk))
-
     def bulk_import(self) -> None:
         logger.info(
             "Will insert: heads: %d, defs: %d", len(self.heads), len(self.definitions),
         )
+
+        dictionary_source_pk = self.dictionary_source.pk
 
         with transaction.atomic():
             DictionarySource.objects.bulk_create([self.dictionary_source])
             Head.objects.bulk_create(self.heads.values())
             Definition.objects.bulk_create(self.definitions.values())
             Definition2Source.objects.bulk_create(
-                Definition2Source(definition_id=def_pk, dictionarysource_id=dict_pk)
-                for def_pk, dict_pk in self.mappings
+                Definition2Source(
+                    definition_id=definition_pk,
+                    dictionarysource_id=dictionary_source_pk,
+                )
+                for definition_pk in self.definitions.keys()
             )
             OnespotDuplicate.objects.bulk_create(self.duplicates)
 
