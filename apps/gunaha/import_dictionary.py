@@ -27,7 +27,7 @@ import re
 from collections import defaultdict
 from hashlib import sha1, sha384
 from pathlib import Path
-from typing import Dict, List, Set, Tuple
+from typing import Dict, List, Optional, Set, Tuple
 
 from django.conf import settings
 from django.db import transaction
@@ -108,42 +108,11 @@ class OnespotWordlistImporter:
         entries = csv.DictReader(tsv_file, delimiter="\t")
 
         for entry in entries:
-            term = normalize_orthography(entry["Bruce - Tsuut'ina text"])
+            head = self.prepare_head_from_entry(entry)
 
-            if should_skip_importing_head(term, entry):
+            # For whatever reason, we need to skip this entry:
+            if head is None:
                 continue
-
-            ############################# Prepare head #####################################
-
-            primary_key = entry["ID"]
-
-            word_class = entry["Part of speech"]
-            unique_tag = (term, word_class)
-
-            if existing_entry := text_wc_to_id.get(unique_tag):
-                duplicates.append(
-                    OnespotDuplicate(
-                        entry_id=primary_key, duplicate_of=heads[existing_entry]
-                    )
-                )
-                logger.info(
-                    "%s (%r) is a duplicate of %s",
-                    primary_key,
-                    unique_tag,
-                    existing_entry,
-                )
-                primary_key = existing_entry
-            else:
-                text_wc_to_id[unique_tag] = primary_key
-
-            # setdefault() will only insert an entry the first time on duplicates.
-            # the first entry in the spreadsheet usually has the most information
-            head = heads.setdefault(
-                primary_key, Head(pk=primary_key, text=term, word_class=word_class)
-            )
-
-            # TODO: tag certain words as "not suitable for school" -- I guess NSFW?
-            # TODO: tag heads with "Folio" -- more specifically where the word came from
 
             ########################## Prepare definition ##################################
 
@@ -180,6 +149,38 @@ class OnespotWordlistImporter:
             OnespotDuplicate.objects.bulk_create(duplicates)
 
         logger.info("Done importing from %s", path_to_tsv)
+
+    def prepare_head_from_entry(self, entry: Dict[str, str]) -> Optional[Head]:
+        term = normalize_orthography(entry["Bruce - Tsuut'ina text"])
+
+        # TODO: tag certain words as "not suitable for school" -- I guess NSFW?
+        # TODO: tag heads with "Folio" -- more specifically where the word came from
+        if should_skip_importing_head(term, entry):
+            return None
+
+        primary_key = entry["ID"]
+
+        word_class = entry["Part of speech"]
+        unique_tag = (term, word_class)
+
+        if existing_entry := self.text_wc_to_id.get(unique_tag):
+            self.duplicates.append(
+                OnespotDuplicate(
+                    entry_id=primary_key, duplicate_of=self.heads[existing_entry]
+                )
+            )
+            logger.info(
+                "%s (%r) is a duplicate of %s", primary_key, unique_tag, existing_entry,
+            )
+            primary_key = existing_entry
+        else:
+            self.text_wc_to_id[unique_tag] = primary_key
+
+        # setdefault() will only insert an entry the first time on duplicates.
+        # the first entry in the spreadsheet usually has the most information
+        return self.heads.setdefault(
+            primary_key, Head(pk=primary_key, text=term, word_class=word_class)
+        )
 
     @property
     def filename(self) -> str:
