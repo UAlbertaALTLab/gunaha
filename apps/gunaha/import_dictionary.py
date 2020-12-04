@@ -64,17 +64,11 @@ def import_dictionary(purge: bool = False) -> None:
     with open(path_to_tsv, "rb") as raw_file:
         raw_bytes = raw_file.read()
 
-    file_hash = compute_hash_of_source(raw_bytes)
-
-    # Purge only once we KNOW we have dictionary content
+    # Purge only once we KNOW we can read the dictionary.
     if purge:
-        with transaction.atomic():
-            logger.warn("Purging ALL existing dictionary content")
-            Definition2Source.objects.all().delete()
-            Definition.objects.all().delete()
-            Head.objects.all().delete()
-            DictionarySource.objects.all().delete()
+        purge_all_existing_entries()
 
+    file_hash = compute_hash_of_source(raw_bytes)
     if not should_import_onespot(file_hash):
         logger.info("Already imported %s; skipping...", path_to_tsv)
         return
@@ -218,3 +212,12 @@ def compute_hash_of_source(raw_bytes: bytes) -> str:
     file_hash = sha384(raw_bytes).hexdigest()
     assert len(file_hash) == 384 // 4
     return file_hash
+
+
+def purge_all_existing_entries() -> None:
+    with transaction.atomic():
+        logger.warn("Purging ALL existing dictionary content")
+        Definition2Source.objects.all().delete()
+        Definition.objects.all().delete()
+        Head.objects.all().delete()
+        DictionarySource.objects.all().delete()
