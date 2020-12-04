@@ -236,8 +236,7 @@ def should_import_onespot(file_hash: str) -> bool:
     try:
         ds = DictionarySource.objects.get(abbrv="Onespot")
     except OperationalError:
-        logger.error("Database does not yet exist...")
-        return False
+        raise DictionaryImportError("Database does not exist; please run migrations!")
     except DictionarySource.DoesNotExist:
         logger.info("Importing for the first time!")
         return True
