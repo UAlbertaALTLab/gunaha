@@ -64,14 +64,9 @@ def import_dictionary(purge: bool = False) -> None:
     with open(path_to_tsv, "rb") as raw_file:
         raw_bytes = raw_file.read()
 
-    file_hash = sha384(raw_bytes).hexdigest()
-    assert len(file_hash) == 384 // 4
-    tsv_file = io.StringIO(raw_bytes.decode("UTF-8"))
-
-    logger.info("Importing %s [SHA-384: %s]", path_to_tsv, file_hash)
+    file_hash = compute_hash_of_source(raw_bytes)
 
     # Purge only once we KNOW we have dictionary content
-
     if purge:
         with transaction.atomic():
             logger.warn("Purging ALL existing dictionary content")
@@ -84,13 +79,7 @@ def import_dictionary(purge: bool = False) -> None:
         logger.info("Already imported %s; skipping...", path_to_tsv)
         return
 
-    onespot = DictionarySource(
-        abbrv="Onespot",
-        title="Onespot-Sapir vocabulary list",
-        editor="Bruce Starlight, John Onespot, Edward Sapir",
-        import_filename=filename,
-        last_import_sha384=file_hash,
-    )
+    logger.info("Importing %s [SHA-384: %s]", path_to_tsv, file_hash)
 
     heads: Dict[str, Head] = {}
     # In case the same head maps to an existing entry ID
@@ -99,7 +88,18 @@ def import_dictionary(purge: bool = False) -> None:
     definitions: Dict[int, Definition] = {}
     mappings: Set[Tuple[int, int]] = set()
 
+    onespot = DictionarySource(
+        abbrv="Onespot",
+        title="Onespot-Sapir vocabulary list",
+        editor="Bruce Starlight, John Onespot, Edward Sapir",
+        import_filename=filename,
+        last_import_sha384=file_hash,
+    )
+
+    logger.info("Importing %s [SHA-384: %s]", path_to_tsv, file_hash)
+    tsv_file = io.StringIO(raw_bytes.decode("UTF-8"))
     entries = csv.DictReader(tsv_file, delimiter="\t")
+
     for entry in entries:
         term = normalize_orthography(entry["Bruce - Tsuut'ina text"])
 
@@ -212,3 +212,9 @@ def should_import_onespot(file_hash: str) -> bool:
     if ds.last_import_sha384 == file_hash:
         return False
     return True
+
+
+def compute_hash_of_source(raw_bytes: bytes) -> str:
+    file_hash = sha384(raw_bytes).hexdigest()
+    assert len(file_hash) == 384 // 4
+    return file_hash
