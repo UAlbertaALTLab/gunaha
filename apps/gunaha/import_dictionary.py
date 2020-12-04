@@ -73,6 +73,8 @@ def import_dictionary(purge: bool = False) -> None:
 
 
 class OnespotWordlistImporter:
+    dictionary_source_id = "Onespot"
+
     def __init__(self, path_to_tsv: Path) -> None:
         self.path_to_tsv = path_to_tsv
         self.raw_bytes = path_to_tsv.read_bytes()
@@ -179,8 +181,6 @@ class OnespotWordlistImporter:
             "Will insert: heads: %d, defs: %d", len(self.heads), len(self.definitions),
         )
 
-        dictionary_source_pk = self.dictionary_source.pk
-
         with transaction.atomic():
             DictionarySource.objects.bulk_create([self.dictionary_source])
             Head.objects.bulk_create(self.heads.values())
@@ -188,7 +188,7 @@ class OnespotWordlistImporter:
             Definition2Source.objects.bulk_create(
                 Definition2Source(
                     definition_id=definition_pk,
-                    dictionarysource_id=dictionary_source_pk,
+                    dictionarysource_id=self.dictionary_source_id,
                 )
                 for definition_pk in self.definitions.keys()
             )
@@ -196,7 +196,7 @@ class OnespotWordlistImporter:
 
     def create_source_for_onespot_wordlist(self) -> DictionarySource:
         return DictionarySource(
-            abbrv="Onespot",
+            abbrv=self.dictionary_source_id,
             title="Onespot-Sapir vocabulary list",
             editor="Bruce Starlight, John Onespot, Edward Sapir",
             import_filename=self.filename,
@@ -205,7 +205,7 @@ class OnespotWordlistImporter:
 
     def has_already_imported_tsv(self) -> bool:
         try:
-            ds = DictionarySource.objects.get(abbrv="Onespot")
+            ds = DictionarySource.objects.get(abbrv=self.dictionary_source_id)
         except OperationalError:
             raise DictionaryImportError(
                 "Database does not exist; please run migrations!"
