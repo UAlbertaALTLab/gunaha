@@ -46,6 +46,8 @@ logger = logging.getLogger(__name__)
 
 private_dir = settings.DATA_DIR / "private"
 
+ONESPOT_ID_PATTERN = re.compile(r"^(os\d{5})(\w)?$")
+
 
 class DictionaryImportError(RuntimeError):
     """
@@ -158,7 +160,19 @@ class OnespotWordlistImporter:
         if should_skip_importing_head(term, entry):
             return None
 
-        primary_key = entry["ID"]
+        entry_id = entry["ID"]
+        match = ONESPOT_ID_PATTERN.match(entry_id)
+        if match is None:
+            logger.warn("ID %s did not match expected ID pattern; skipped.", entry_id)
+            return None
+
+        primary_key, suffix = match.groups()
+        if suffix:
+            logger.warn(
+                "discarding “%s” suffix from %s and hoping it all goes okay...",
+                suffix,
+                entry_id,
+            )
 
         word_class = entry["Part of speech"]
         unique_tag = (term, word_class)
