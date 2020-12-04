@@ -87,6 +87,10 @@ class OnespotWordlistImporter:
         self.definitions: Dict[int, Definition] = {}
         self.mappings: Set[Tuple[int, int]] = set()
 
+    @property
+    def filename(self) -> str:
+        return self.path_to_tsv.name
+
     def run(self) -> None:
         if not should_import_onespot(self.file_hash):
             logger.info("Already imported %s; skipping...", self.path_to_tsv)
@@ -188,10 +192,6 @@ class OnespotWordlistImporter:
                 for def_pk, dict_pk in self.mappings
             )
             OnespotDuplicate.objects.bulk_create(self.duplicates)
-
-    @property
-    def filename(self) -> str:
-        return self.path_to_tsv.name
 
     def create_source_for_onespot_wordlist(self) -> DictionarySource:
         return DictionarySource(
