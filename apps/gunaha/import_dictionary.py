@@ -91,8 +91,12 @@ class OnespotWordlistImporter:
         return self.path_to_tsv.name
 
     def run(self) -> None:
-        if not should_import_onespot(self.file_hash):
-            logger.info("Already imported %s; skipping...", self.path_to_tsv)
+        if not self.should_import_onespot():
+            logger.info(
+                "Already imported %s [SHA-384: %s]; skipping...",
+                self.path_to_tsv,
+                self.file_hash,
+            )
             return
 
         logger.info("Importing %s [SHA-384: %s]", self.path_to_tsv, self.file_hash)
@@ -204,6 +208,22 @@ class OnespotWordlistImporter:
             last_import_sha384=self.file_hash,
         )
 
+    def should_import_onespot(self) -> bool:
+        try:
+            ds = DictionarySource.objects.get(abbrv="Onespot")
+        except OperationalError:
+            raise DictionaryImportError(
+                "Database does not exist; please run migrations!"
+            )
+        except DictionarySource.DoesNotExist:
+            logger.info("Importing for the first time!")
+            return True
+
+        if self.file_hash == ds.last_import_sha384:
+            return False
+
+        return True
+
 
 def should_skip_importing_head(head: str, info: dict) -> bool:
     if head == "":
@@ -230,20 +250,6 @@ def make_primary_key(*args: str) -> int:
     """
     number = int(sha1("\n".join(args).encode("UTF-8")).hexdigest(), base=16)
     return number & 0xFFFFFFFF
-
-
-def should_import_onespot(file_hash: str) -> bool:
-    try:
-        ds = DictionarySource.objects.get(abbrv="Onespot")
-    except OperationalError:
-        raise DictionaryImportError("Database does not exist; please run migrations!")
-    except DictionarySource.DoesNotExist:
-        logger.info("Importing for the first time!")
-        return True
-
-    if ds.last_import_sha384 == file_hash:
-        return False
-    return True
 
 
 def compute_hash_of_source(raw_bytes: bytes) -> str:
