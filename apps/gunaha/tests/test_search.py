@@ -41,6 +41,7 @@ def test_query_not_found(search_by_query):
     assert "No results for" in res.content.decode("UTF-8")
 
 
+@pytest.mark.django_db
 def test_search_in_tsuutina_only(search_by_query):
     query = "dog"
     tsuutina = "dóghà"
@@ -55,6 +56,7 @@ def test_search_in_tsuutina_only(search_by_query):
     assertInHTML(f"<li> {escape_html(incorrect_definition)}", page, count=0)
 
 
+@pytest.mark.django_db
 def test_search_in_english_only(search_by_query):
     query = "dog"
     tsuutina = "tłích'ā"
@@ -69,6 +71,7 @@ def test_search_in_english_only(search_by_query):
     assertInHTML(f"<li> {escape_html(incorrect_definition)}", page, count=0)
 
 
+@pytest.mark.django_db
 def test_search_empty_lang(search_by_query):
     query = "dog"
 
