@@ -93,20 +93,22 @@ class OnespotWordlistImporter:
             return
 
         logger.info("Importing %s [SHA-384: %s]", self.path_to_tsv, self.file_hash)
+
+        self.prepare_models_before_import()
+        self.bulk_import()
+
+        logger.info("Done importing from %s", self.path_to_tsv)
+
+    def prepare_models_before_import(self) -> None:
         tsv_file = io.StringIO(self.raw_bytes.decode("UTF-8"))
         entries = csv.DictReader(tsv_file, delimiter="\t")
         for entry in entries:
             head = self.prepare_head_from_entry(entry)
-
-            # For whatever reason, we need to skip this entry:
             if head is None:
+                # For whatever reason, we need to skip this entry:
                 continue
-
             # TODO: this entry might define the PREVIOUS entry?
             self.prepare_definition_from_entry(entry, head)
-
-        self.bulk_import()
-        logger.info("Done importing from %s", self.path_to_tsv)
 
     def prepare_head_from_entry(self, entry: Dict[str, str]) -> Optional[Head]:
         term = normalize_orthography(entry["Bruce - Tsuut'ina text"])
