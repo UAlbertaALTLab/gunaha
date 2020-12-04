@@ -61,12 +61,17 @@ def import_dictionary(purge: bool = False) -> None:
     if not path_to_tsv.exists():
         raise DictionaryImportError(f"Cannot find dictionary file: {path_to_tsv}")
 
-    importer = OnespotWordlistImporter(path_to_tsv, purge)
+    importer = OnespotWordlistImporter(path_to_tsv)
+
+    # Purge only once we KNOW we can read the dictionary.
+    if purge:
+        purge_all_existing_entries()
+
     importer.run()
 
 
 class OnespotWordlistImporter:
-    def __init__(self, path_to_tsv: Path, purge: bool) -> None:
+    def __init__(self, path_to_tsv: Path) -> None:
         self.path_to_tsv = path_to_tsv
         self.raw_bytes = path_to_tsv.read_bytes()
         self.file_hash = compute_hash_of_source(self.raw_bytes)
