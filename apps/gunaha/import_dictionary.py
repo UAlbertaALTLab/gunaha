@@ -43,17 +43,21 @@ logger = logging.getLogger(__name__)
 private_dir = settings.DATA_DIR / "private"
 
 
-def import_dictionary(purge: bool = False) -> None:
-    Definition2Source = Definition.citations.through
+class DictionaryImportError(RuntimeError):
+    """
+    When something goes wrong during the dictionary import process.
+    """
 
+
+def import_dictionary(purge: bool = False) -> None:
     logger.info("Importing OneSpot-Sapir vocabulary list")
+
+    Definition2Source = Definition.citations.through
 
     filename = "Onespot-Sapir-Vocabulary-list-OS-Vocabulary.tsv"
     path_to_tsv = private_dir / filename
     if not path_to_tsv.exists():
-        # TODO: raise an error
-        logger.error("Cannot find dictionary file @ %s. Skipping...", path_to_tsv)
-        return
+        raise DictionaryImportError("Cannot find dictionary file @ {path_to_tsv}.")
 
     with open(path_to_tsv, "rb") as raw_file:
         raw_bytes = raw_file.read()
