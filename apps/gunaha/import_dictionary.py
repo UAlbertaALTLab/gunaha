@@ -91,7 +91,7 @@ class OnespotWordlistImporter:
         return self.path_to_tsv.name
 
     def run(self) -> None:
-        if not self.should_import_onespot():
+        if self.has_already_imported_tsv():
             logger.info(
                 "Already imported %s [SHA-384: %s]; skipping...",
                 self.path_to_tsv,
@@ -207,6 +207,9 @@ class OnespotWordlistImporter:
             import_filename=self.filename,
             last_import_sha384=self.file_hash,
         )
+
+    def has_already_imported_tsv(self) -> bool:
+        return not self.should_import_onespot()
 
     def should_import_onespot(self) -> bool:
         try:
