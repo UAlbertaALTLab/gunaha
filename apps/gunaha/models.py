@@ -33,6 +33,9 @@ class Recording(models.Model):
     """
 
     entry = models.ForeignKey(
-        Head, on_delete=models.CASCADE, help_text="recording of what head?"
+        Head, on_delete=models.CASCADE, help_text="entry that this is a recording of"
     )
     compressed_audio = models.FileField(upload_to="recordings")
+
+    def __str__(self) -> str:
+        return f"🔊 “{self.entry.text}”"
