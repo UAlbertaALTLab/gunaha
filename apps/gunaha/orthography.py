@@ -33,7 +33,7 @@ def normalize_orthography(tsuutina_word: str) -> str:
     """
     Make the orthography of Tsuut'ina words consistent.
     """
-    LATIN_SMALL_LETTER_L_WITH_MIDDLE_TIDLE = "\u026B"
+    LATIN_SMALL_LETTER_L_WITH_MIDDLE_TILDE = "\u026B"
     LATIN_SMALL_LETTER_L_WITH_STROKE = "\u0142"
 
     tsuutina_word = tsuutina_word.strip()
@@ -41,7 +41,7 @@ def normalize_orthography(tsuutina_word: str) -> str:
     # According to Chris Cox: Original mostly used <ɫ>, but writers now prefer
     # <ł>, as it is more distinct from <t>. So let's make it consistent!
     tsuutina_word = tsuutina_word.replace(
-        LATIN_SMALL_LETTER_L_WITH_MIDDLE_TIDLE, LATIN_SMALL_LETTER_L_WITH_STROKE
+        LATIN_SMALL_LETTER_L_WITH_MIDDLE_TILDE, LATIN_SMALL_LETTER_L_WITH_STROKE
     )
     return tsuutina_word
 

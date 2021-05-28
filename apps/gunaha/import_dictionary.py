@@ -22,8 +22,10 @@ Paraphrased from Dr. Chris Cox:
 
 import csv
 import io
+import json
 import logging
 import re
+import sys
 from collections import defaultdict
 from hashlib import sha1, sha384
 from pathlib import Path
@@ -46,6 +48,8 @@ logger = logging.getLogger(__name__)
 
 private_dir = settings.DATA_DIR / "private"
 
+DICTIONARY_FILENAME = "Onespot-Sapir-Vocabulary-list-OS-Vocabulary.tsv"
+DICTIONARY_PATH = private_dir / DICTIONARY_FILENAME
 ONESPOT_ID_PATTERN = re.compile(r"^(os\d{5})(\w)?$")
 
 
@@ -55,15 +59,23 @@ class DictionaryImportError(RuntimeError):
     """
 
 
-def import_dictionary(purge: bool = False) -> None:
+def import_dictionary(
+    output_json_file: str,
+    input_tsv_file=DICTIONARY_PATH,
+    purge: bool = False,
+    json_only=False,
+) -> None:
     logger.info("Importing OneSpot-Sapir vocabulary list")
 
-    filename = "Onespot-Sapir-Vocabulary-list-OS-Vocabulary.tsv"
-    path_to_tsv = private_dir / filename
-    if not path_to_tsv.exists():
-        raise DictionaryImportError(f"Cannot find dictionary file: {path_to_tsv}")
+    input_tsv_file = Path(input_tsv_file)
+    if not input_tsv_file.exists():
+        raise DictionaryImportError(f"Cannot find dictionary file: {input_tsv_file}")
 
-    importer = OnespotWordlistImporter(path_to_tsv)
+    importer = OnespotWordlistImporter(
+        path_to_tsv=input_tsv_file,
+        output_json_file=Path(output_json_file),
+        json_only=json_only,
+    )
 
     # Purge only once we KNOW we can read the dictionary.
     if purge:
@@ -75,8 +87,12 @@ def import_dictionary(purge: bool = False) -> None:
 class OnespotWordlistImporter:
     dictionary_source_id = "Onespot"
 
-    def __init__(self, path_to_tsv: Path) -> None:
+    def __init__(
+        self, path_to_tsv: Path, output_json_file: Path, json_only=False
+    ) -> None:
         self.path_to_tsv = path_to_tsv
+        self.output_json_file = output_json_file
+        self.json_only = json_only
         self.raw_bytes = path_to_tsv.read_bytes()
         self.file_hash = compute_hash_of_source(self.raw_bytes)
         self.dictionary_source = self.create_source_for_onespot_wordlist()
@@ -93,15 +109,37 @@ class OnespotWordlistImporter:
         return self.path_to_tsv.name
 
     def run(self) -> None:
-        if self.has_already_imported_tsv():
-            return
-
-        logger.info("Importing %s [SHA-384: %s]", self.path_to_tsv, self.file_hash)
-
         self.prepare_models_before_import()
-        self.bulk_import()
+
+        if not self.json_only:
+            if self.has_already_imported_tsv():
+                logger.info("Already imported, skipping.")
+                return
+
+            logger.info("Importing %s [SHA-384: %s]", self.path_to_tsv, self.file_hash)
+
+            self.bulk_import()
+
+        self.write_json()
 
         logger.info("Done importing from %s", self.path_to_tsv)
+
+    def write_json(self):
+        ret = []
+        heads_to_defns = defaultdict(list)
+        for d in self.definitions.values():
+            heads_to_defns[d.defines].append(d)
+
+        for head, defns in heads_to_defns.items():
+            entry = {
+                "text": head.text,
+                "word_class": head.word_class,
+                "defns": [d.text for d in defns],
+            }
+            ret.append(entry)
+
+        with self.output_json_file.open("w") as f:
+            json.dump(ret, f, indent=True, ensure_ascii=False)
 
     def prepare_models_before_import(self) -> None:
         tsv_file = io.StringIO(self.raw_bytes.decode("UTF-8"))
@@ -146,7 +184,10 @@ class OnespotWordlistImporter:
                 )
             )
             logger.info(
-                "%s (%r) is a duplicate of %s", primary_key, unique_tag, existing_entry,
+                "%s (%r) is a duplicate of %s",
+                primary_key,
+                unique_tag,
+                existing_entry,
             )
             primary_key = existing_entry
         else:
@@ -178,7 +219,9 @@ class OnespotWordlistImporter:
 
     def bulk_import(self) -> None:
         logger.info(
-            "Will insert: heads: %d, defs: %d", len(self.heads), len(self.definitions),
+            "Will insert: heads: %d, defs: %d",
+            len(self.heads),
+            len(self.definitions),
         )
 
         with transaction.atomic():
